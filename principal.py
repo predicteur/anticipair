@@ -11,17 +11,17 @@ from numpy import zeros
 import predicteur as pred
 from constante import ANNEE_POINT, DATE_INIT, HEURE_POINT, HORIZON, \
     JOUR_POINT, MOIS_POINT, NON_FILTRE, N_DEPART, N_RESULT, \
-    TIME_HEURE, VAL_ANNEE, VAL_HEURE, VAL_JOUR, VAL_MOIS, VAL_VALEUR
+    TIME_HEURE, VAL_ANNEE, VAL_HEURE, VAL_JOUR, VAL_MOIS, VAL_VALEUR, V_VENT
 
 from constante import N2AIXA, N2AIXC, N2CINQ, N2PLOM, O3AIXA, O3AIXP, O3CINQ, \
     PCAIXA, PCAIXC, PCCINQ, PCRABA, PCSTLO, N2RABA, N2STLO
 
 
 def Lecture_Nouvelle_Valeur(instant, donnees):
-    """ simulation de nouvelles données :
+    """ simulation d'acquisition de nouvelles mesures :
 
         Instant : numéro horaire de la données à partir du 1/1/2014 0h
-        données : liste des mesures initailisées"""
+        données : liste des mesures initialisées"""
 
     valeur = zeros((5))
     valeur[VAL_VALEUR] = donnees[NON_FILTRE, instant]
@@ -33,19 +33,34 @@ def Lecture_Nouvelle_Valeur(instant, donnees):
     return valeur
 
 
+def Lecture_Nouvelle_Valeur_Vent(instant, donnees):
+    """ simulation d'acquisition de nouvelles vitesse vent :
+
+        Instant : numéro horaire de la données à partir du 1/1/2014 0h
+        données : liste des mesures initialisées"""
+
+    vitesse_vent = zeros((HORIZON + 1))
+    for i in range(HORIZON + 1):
+        vitesse_vent[i] = donnees[V_VENT, instant + i + 1]
+
+    return vitesse_vent
+
+
 def Essai_Predicteur1():
     """ essai avec réinitialisation à chaque pas de temps"""
 
     reset_prediction = True
     resultat = zeros((HORIZON))
-    serie_traitee = PCAIXA
+    serie_traitee = N2AIXA
 
     for instant in range(N_DEPART, N_RESULT + 1):
         pred1 = pred.predicteur(serie_traitee, reset_prediction)
         nouv_valeur = Lecture_Nouvelle_Valeur(instant-1, pred1.donnees)
+        vitesse_vent = Lecture_Nouvelle_Valeur_Vent(instant-1, pred1.donnees)
         # print("valeur : ", nouv_valeur[0], " prévu : ", resultat[0],
         #      " écart : ", (nouv_valeur[0] - resultat[0]))
-        resultat = pred1.Prediction_Filtre(nouv_valeur)
+        resultat = pred1.Prediction(nouv_valeur)
+        # resultat = pred1.Prediction(nouv_valeur, vitesse_vent)
         # print("valeur : ", nouv_valeur[0], " prévu : ", resultat[0],
         #      " écart : ", (nouv_valeur[0] - resultat[0]))
         print("resultat", resultat)
@@ -59,20 +74,23 @@ def Essai_Predicteur2():
     reset_prediction = True
     resultat = zeros((HORIZON))
     resultat_filtre = zeros((HORIZON))
-    serie_traitee = PCAIXA
+    serie_traitee = N2AIXA
     pred1 = pred.predicteur(serie_traitee, reset_prediction)
     date_mesure = DATE_INIT
     tendance = 0
     # print(pred1.buffer)
     for instant in range(N_DEPART, N_RESULT + 1):
         nouv_valeur = Lecture_Nouvelle_Valeur(instant-1, pred1.donnees)
-        # print("date mesure", date_mesure + TIME_HEURE, "valeur : ",
-        #      nouv_valeur[0], " prévu : ", resultat[0], "prévu filtré : ",
-        #      resultat_filtre[0])
+        vitesse_vent = Lecture_Nouvelle_Valeur_Vent(instant-1, pred1.donnees)
+        print("date mesure", nouv_valeur[1], nouv_valeur[2], "valeur : ",
+              nouv_valeur[0], " prévu : ", resultat[0], "prévu filtré : ",
+              resultat_filtre[0])
+        # print("resultat", resultat)
         # print("valeur : non filtre, heure, jour, mois, annee", nouv_valeur)
+        # print("vvent : ", vitesse_vent)
         # print("instant", instant)
-        # resultat = pred1.Prediction_Valeur(nouv_valeur)
         resultat = pred1.Prediction(nouv_valeur)
+        # resultat = pred1.Prediction(nouv_valeur, vitesse_vent)
         date_mesure = pred1.Info_Date()
         tendance = pred1.Tendance()
         ecart_moyen = pred1.Ecart_Moyen(1)
@@ -91,8 +109,8 @@ def Essai_Predicteur2():
         # resultat = pred1.Prediction(nouv_valeur)
         # print("prévu3 : ", resultat[0])  # erreur afichage de -1
         # print("prévision 0, 1, 2, 3, 4", resultat)
-        resultat_filtre = pred1.Prediction_Filtre(nouv_valeur)
-        print("resultat1", resultat)
+        resultat_filtre = pred1.Prediction_Filtre(nouv_valeur, vitesse_vent)
+        # print("resultat1", resultat)
     del pred1
 
-Essai_Predicteur2()
+Essai_Predicteur1()

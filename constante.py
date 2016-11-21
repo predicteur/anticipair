@@ -7,13 +7,13 @@ Created on Sat Jul 30 17:02:00 2016
 Déclaration des constantes utilisées pour la prédiction
 """
 
-from numpy import zeros
+from numpy import zeros, ones
 from datetime import timedelta, datetime
 
 #   constantes generales non ajustables (liees a la structure du programme)
 
 # donnees bibliotheque et buffer
-N_ATTRIBUT = 7    # nombre d attributs pour les donnees et pour buffer
+N_ATTRIBUT = 8    # nombre d attributs pour les donnees et pour buffer
 NON_FILTRE = 0    # valeur non filtrees
 FILTRE = 1    # valeur filtrees
 SEQUENCE = 2  # sequence(1 nuit 0-5, 2 matin 6-10, 3 midi 11-16, 4 soir 17-23)
@@ -36,15 +36,26 @@ ANNEE_POINT = 7    # annee de la valeur
 MIN_SEQ = 0    # mini de la sequence
 MAX_SEQ = 1    # maxi de la sequence
 NB_SEQ = 4    # nombre de sequences
+V_VENT = 8    # valeur de la vitesse du vent
 # predicteur analogie
 ANA_HEURE = 0    # heure du resultat
 ANA_ECART_MC = 1    # ecart MC du resultat
+ANA_V_VENT = 2    # vitesse du vent du resultat
 # predicteur parametre
 PARA_HEURE = 0    # heure du resultat
 PARA_ECART_MC = 1    # ecart MC du resultat
+PARA_V_VENT = 2    # vitesse du vent du resultat
 # prediction
 PRED_ECART = 0  # ecart prediction
 PRED_RANG = 1    # rang prediction
+NB_V_ALGO = 7    # nombre de parametres des algorithmes
+N_PRED_MOYEN = 0    # vitesse prediction historique
+N_ECART = 1    # vitesse prediction par ecart
+N_MEMOIRE = 2    # vitesse prediction par ordre
+N_PREDIC = 3    # vitesse prediction par meilleur1
+N_PREDIC2 = 4    # vitesse prediction par meilleur2
+N_PREDIC3 = 5    # vitesse prediction par meilleur3
+N_PENAL = 6    # vitesse prediction par penalisation moins bon
 # valeurs predites
 VAL_ANNEE = 4
 VAL_MOIS = 3
@@ -77,25 +88,40 @@ PCAIXC = 14  # colonne de la serie
 PCCINQ = 15  # colonne de la serie
 PCRABA = 16  # colonne de la serie
 PCSTLO = 17  # colonne de la serie
+AIXVV = 18  # colonne de la serie
 
 # simulation : parametres de reglage
-N_RESULT = 60    # nombre de donnees traitees (9000), 90, 900
+N_RESULT = 40    # nombre de donnees traitees (9000), 90, 900
 N_DEPART = 26    # premiere ligne des donnees traitees, 26
+N_AFFICHE = N_RESULT + 100  # nombre de lignes a afficher
+N_COLONNE = 200  # nombre de colonnes a afficher
 TAILLE_BUFFER = 24  # taille du buffer pour les donnees acquises et predites
+PARA_SENS = 1    # METTRE A -1 POUR LES SERIES O3 ET A 1 POUR LES AUTRES SERIES
 DEBUG_DONNEES = False  # export des donnees
 DEBUG_BUFFER = False  # export des buffer
 DEBUG_ANALOGIE = False  # export des donnees analogie
 DEBUG_PARAMETRE = False  # export des donnees parametre
+DEBUG_REFERENCE = False  # export des donnees reference
+DEBUG_VENT = False  # export des donnees vent
+DEBUG_ALGO = False  # export des donnees algo
 DEBUG_PREDICTION = False  # export des donnnees predites
 DEBUG_PREDICTION1 = False  # export des donnees predites h+1
 DEBUG_PREDICTION2 = False  # export des donnees predites h+2
 DEBUG_PREDICTION3 = False  # export des donnees predites h+3
 DEBUG_PREDICTION4 = False  # export des donnees predites h+4
 DEBUG_PREDICTION5 = False  # export des donnees predites h+5
+DEBUG_PREDICTION6 = False  # export des donnees predites h+6
 AFFICHE_HORIZON = 0    # horizon de prediction pour ana et para (0 a HORIZON-1)
 
+# predicteur vent : parametres de reglage
+VENT_SCENARIO = 5    # nombre de predicteurs vent (idem PRED_RESULTAT)
+VENT_MIN = 0.8    # seuil min vitesse vent (était 0,8)
+VENT_MAX = 3.3    # seuil max vitesse vent (était 3,3)
+VENT_PRED = True  # activation sur les valeurs prédites (false->dernières vals)
+VENT_PARANA = True    # tri/vent des sequences testees pour pred para et ana
+
 # predicteur reference : parametres de reglage
-REF_SCENARIO = 3    # nombre de predicteurs de reference
+REF_SCENARIO = 4    # nombre de predicteurs de reference
 REF_PENTE = 1.    # pente du predicteurs de reference (par défaut valeur 1)
 
 # predicteur analogie : parametres de reglage
@@ -107,44 +133,61 @@ ANA_SCENARIO = 8   # nombre de scenario de calcul d ecart traites
 # predicteur parametre : parametres de reglage
 PARA_PROFONDEUR = 3   # nombre de points de comparaison
 PARA_HORIZON_POINT = 20   # horizon de recherche des points (< a TAILLE_BUFFER)
-PARA_SENS = 1    # METTRE A -1 POUR LES SERIES O3 ET A 1 POUR LES AUTRES SERIES
 
 # traitement et prediction : parametres de reglage
-PRED_MOYEN = 0  # moyenne historique des rangs des prédicteurs (1 : h et h-1)
-HORIZON = 5    # horizon de prediction (nombre d heures predites)
-PRED_OPTION = 1   # 0 :coef direct, 1 :V_PREDIC, 2 :V_PREDIC + moins bons
-V_PREDIC = 0.1    # vitesse d evolution de la prediction : etait (0,08)
-V_PREDIC2 = 0.06    # vitesse d evolution de la prediction : etait (0,04)
-V_PREDIC3 = 0.03    # vitesse d evolution de la prediction : etait (0,02)
+HORIZON = 6    # horizon de prediction (nombre d heures predites)
+V_PRED_MOYEN = 1  # moyenne histo des rangs des prédicteurs (0 :h, 1 :h et h-1)
+V_PENAL = 1.   # vitesse d evolution de la penalisation des mauvais predicteurs
+V_MEMOIRE = 1.    # vitesse d evolution - methode par ordre
+V_ECART = 0.5    # vitesse d evolution - methode par ecart
+V_PREDIC = 0.05    # vitesse d evolution de la prediction : etait (0,08)
+V_PREDIC2 = 0.04    # vitesse d evolution de la prediction : etait (0,04)
+V_PREDIC3 = 0.01    # vitesse d evolution de la prediction : etait (0,02)
 V_MOYENNE = 0.3    # vitesse d evolution de la moyenne : etait 0.1
 ACTIVATION_REF = True    # activation predicteur de reference
 ACTIVATION_ANA = True    # activation predicteur analogie
 ACTIVATION_PARAM = True    # activation predicteur parametre
+ACTIVATION_VENT = True    # activation predicteur vent
+ACTIVATION_MAUVAIS = False  # penalisation preds mauvais / algos optimisation
 PRED_RESULTAT = 5   # nombre de meilleurs candidats ana et param conserves
-NB_PREDICTEURS = REF_SCENARIO + ANA_SCENARIO + PRED_RESULTAT  # total des pred
+NB_ALGO = 20   # nombre d algorithmes d'optimisation
+OPTI_ALGO = 1   # vitesse algo(1 : v=1/ecart, 2 : param mémoire, 3 : V_PREDIC)
 
+# constantes déduite
+NB_PREDICTEURS = REF_SCENARIO + ANA_SCENARIO + 2 * PRED_RESULTAT  # nb des pred
+NB_ECART_PRED = NB_PREDICTEURS + NB_ALGO + 2  # unitaire+synthèse+meill+filtre
+I_REF = 0
+I_ANA = I_REF + REF_SCENARIO
+I_PARAM = I_ANA + ANA_SCENARIO
+I_VENT = I_PARAM + PRED_RESULTAT
+I_ALGO = I_VENT + VENT_SCENARIO
+I_MEILLEUR = I_ALGO + NB_ALGO
 
 # initialisation des coefficients d ajustement des predicteurs
-
 C_MEM_PREDICTION = zeros((NB_PREDICTEURS))
 C_MEM_PREDICTION[0] = 0.15
 C_MEM_PREDICTION[1] = 0.13
-C_MEM_PREDICTION[2] = 0.1
+C_MEM_PREDICTION[2] = 0.11
 C_MEM_PREDICTION[3] = 0.09
 C_MEM_PREDICTION[4] = 0.08
 C_MEM_PREDICTION[5] = 0.07
 C_MEM_PREDICTION[6] = 0.06
-C_MEM_PREDICTION[7] = 0.06
+C_MEM_PREDICTION[7] = 0.05
 C_MEM_PREDICTION[8] = 0.05
 C_MEM_PREDICTION[9] = 0.04
 C_MEM_PREDICTION[10] = 0.04
 C_MEM_PREDICTION[11] = 0.03
 C_MEM_PREDICTION[12] = 0.03
-C_MEM_PREDICTION[13] = 0.03
+C_MEM_PREDICTION[13] = 0.02
 C_MEM_PREDICTION[14] = 0.02
-C_MEM_PREDICTION[15] = 0.02
+C_MEM_PREDICTION[15] = 0.01
+C_MEM_PREDICTION[16] = 0.01
+C_MEM_PREDICTION[17] = 0.01
+C_MEM_PREDICTION[18] = 0.0
+C_MEM_PREDICTION[19] = 0.0
+C_MEM_PREDICTION[20] = 0.0
 
-# memoire analogie
+# initialisation des coef memoire analogie
 C_MEM_ANA = zeros((ANA_PROFONDEUR, ANA_SCENARIO))
 C_MEM_ANA[0, 0] = 0.05
 C_MEM_ANA[1, 0] = 0.05
@@ -218,8 +261,51 @@ C_MEM_ANA[5, 7] = 0.25
 C_MEM_ANA[6, 7] = 0.25
 C_MEM_ANA[7, 7] = 0.15
 
-# memoire parametre
+# initialisation des coef memoire parametre
 C_MEM_PARAM = zeros((PARA_PROFONDEUR))
 C_MEM_PARAM[0] = 0.3
 C_MEM_PARAM[1] = 0.5
 C_MEM_PARAM[2] = 0.2
+
+# initialisation des parametres des algorithmes
+C_ALGO_PARAM = -ones((NB_ALGO, NB_V_ALGO))
+for i in range(NB_ALGO):
+    C_ALGO_PARAM[i, 0] = 0.0
+    k = int(i / 2)
+    C_ALGO_PARAM[2 * k, N_PENAL] = 1
+C_ALGO_PARAM[0, N_ECART] = 0.5 * V_ECART
+C_ALGO_PARAM[1, N_ECART] = 0.5 * V_ECART
+C_ALGO_PARAM[2, N_ECART] = 1. * V_ECART
+C_ALGO_PARAM[3, N_ECART] = 1. * V_ECART
+C_ALGO_PARAM[4, N_ECART] = 1.2 * V_ECART
+C_ALGO_PARAM[5, N_ECART] = 1.2 * V_ECART
+C_ALGO_PARAM[6, N_MEMOIRE] = 0.5 * V_MEMOIRE
+C_ALGO_PARAM[7, N_MEMOIRE] = 0.5 * V_MEMOIRE
+C_ALGO_PARAM[8, N_MEMOIRE] = 1. * V_MEMOIRE
+C_ALGO_PARAM[9, N_MEMOIRE] = 1. * V_MEMOIRE
+C_ALGO_PARAM[10, N_MEMOIRE] = 2. * V_MEMOIRE
+C_ALGO_PARAM[11, N_MEMOIRE] = 2. * V_MEMOIRE
+C_ALGO_PARAM[12, N_PREDIC] = V_PREDIC
+C_ALGO_PARAM[12, N_PREDIC2] = V_PREDIC2
+C_ALGO_PARAM[12, N_PREDIC3] = V_PREDIC3
+C_ALGO_PARAM[13, N_PREDIC] = V_PREDIC
+C_ALGO_PARAM[13, N_PREDIC2] = V_PREDIC2
+C_ALGO_PARAM[13, N_PREDIC3] = V_PREDIC3
+C_ALGO_PARAM[14, N_PREDIC] = V_PREDIC
+C_ALGO_PARAM[14, N_PREDIC2] = V_PREDIC2 - 0.01
+C_ALGO_PARAM[14, N_PREDIC3] = V_PREDIC3 + 0.01
+C_ALGO_PARAM[15, N_PREDIC] = V_PREDIC
+C_ALGO_PARAM[15, N_PREDIC2] = V_PREDIC2 - 0.01
+C_ALGO_PARAM[15, N_PREDIC3] = V_PREDIC3 + 0.01
+C_ALGO_PARAM[16, N_PREDIC] = V_PREDIC - 0.01
+C_ALGO_PARAM[16, N_PREDIC2] = V_PREDIC2 - 0.03
+C_ALGO_PARAM[16, N_PREDIC3] = V_PREDIC3
+C_ALGO_PARAM[17, N_PREDIC] = V_PREDIC - 0.01
+C_ALGO_PARAM[17, N_PREDIC2] = V_PREDIC2 - 0.03
+C_ALGO_PARAM[17, N_PREDIC3] = V_PREDIC3
+C_ALGO_PARAM[18, N_PREDIC] = V_PREDIC - 0.02
+C_ALGO_PARAM[18, N_PREDIC2] = V_PREDIC2 - 0.03
+C_ALGO_PARAM[18, N_PREDIC3] = V_PREDIC3
+C_ALGO_PARAM[19, N_PREDIC] = V_PREDIC - 0.02
+C_ALGO_PARAM[19, N_PREDIC2] = V_PREDIC2 - 0.03
+C_ALGO_PARAM[19, N_PREDIC3] = V_PREDIC3
