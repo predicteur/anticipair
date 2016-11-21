@@ -22,7 +22,7 @@ from constante import ACTIVATION_ANA, ACTIVATION_PARAM, ACTIVATION_REF,\
     PCAIXC, PCCINQ, PCRABA, PCSTLO, PRED_RESULTAT, SEQUENCE, \
     SOIR, TAILLE_BUFFER, TIME_HEURE, TYPE_POINT, VAL_ANNEE, VAL_HEURE, \
     VAL_JOUR, VAL_MOIS, VAL_VALEUR, V_MOYENNE, V_PREDIC, V_PREDIC2, V_PREDIC3,\
-    REF_SCENARIO
+    REF_SCENARIO, I_ANA, I_PARAM, I_MEILLEUR, I_REF, I_VENT, I_ALGO
 
 
 def Affiche_Donnees_Traitees(donnees):
@@ -49,80 +49,80 @@ def Affiche_Buffer(buffer):
     print(buffer)
 
 
-def Affiche_Analogie(buffer, b_prediction_analogie,
-                     ecart_pred_analogie, resultat_analogie,
-                     ecart_analogie_global):
+def Affiche_Analogie(buffer, b_pred_analogie, ecart_predicteur):
 
     i = 6
     k = 0
-    print("b_pred-ana0600", "b_pred_ana0640")
-    print(b_prediction_analogie[k, i, 0, k],
-          b_prediction_analogie[k, i, 1, k],
-          b_prediction_analogie[k, i, 2, k],
-          b_prediction_analogie[k, i, 3, k],
-          b_prediction_analogie[k, i, 4, k])
-    print("ecart_pred-ana600", "ecart_pred_ana640")
-    print(ecart_pred_analogie[i, 0, k],
-          ecart_pred_analogie[i, 1, k],
-          ecart_pred_analogie[i, 2, k],
-          ecart_pred_analogie[i, 3, k],
-          ecart_pred_analogie[i, 4, k])
-    print("ecart_ana_global60", "ecart_ana_global64")
-    print(ecart_analogie_global[i, 0],
-          ecart_analogie_global[i, 1],
-          ecart_analogie_global[i, 2],
-          ecart_analogie_global[i, 3],
-          ecart_analogie_global[i, 4])
-    print("resultat-ana0 ... resultat-ana5 ")
-    print(resultat_analogie[ANA_HEURE, 0], resultat_analogie[ANA_HEURE, 1],
-          resultat_analogie[ANA_HEURE, 2], resultat_analogie[ANA_HEURE, 3],
-          resultat_analogie[ANA_HEURE, 4], resultat_analogie[ANA_HEURE, 5])
-    print("ecartmc-ana0 ... ecartmc-ana5 ")
-    print(resultat_analogie[ANA_ECART_MC, 0],
-          resultat_analogie[ANA_ECART_MC, 1],
-          resultat_analogie[ANA_ECART_MC, 2],
-          resultat_analogie[ANA_ECART_MC, 3],
-          resultat_analogie[ANA_ECART_MC, 4],
-          resultat_analogie[ANA_ECART_MC, 5])
+    print("b_pred-ana0600", "b_pred_ana0640",
+          b_pred_analogie[k, i, 0, k], b_pred_analogie[k, i, 1, k],
+          b_pred_analogie[k, i, 2, k], b_pred_analogie[k, i, 3, k],
+          b_pred_analogie[k, i, 4, k])
+    print("ecart_pred-ana60", ecart_predicteur[i+I_ANA, k])
 
 
-def Affiche_Parametre(buffer, b_prediction_parametre,
-                      ecart_pred_parametre, resultat_parametre):
+def Affiche_Reference(buffer, b_pred_reference, ecart_predicteur):
 
     k = 0
-    print("pred-para0", "pred_para1")
-    print(b_prediction_parametre[0, 0, k],
-          b_prediction_parametre[0, 1, k])
-    print("ecart_pred-para0", "ecart_pred_para1")
-    print(ecart_pred_parametre[0, k],
-          ecart_pred_parametre[1, k])
-    print("resultat-para0 a resultat-para4 ")
-    print(resultat_parametre[PARA_HEURE, 0], resultat_parametre[PARA_HEURE, 1],
-          resultat_parametre[PARA_HEURE, 2], resultat_parametre[PARA_HEURE, 3],
-          resultat_parametre[PARA_HEURE, 4])
+    print("pred-ref0...pred_ref3", b_pred_reference[0, 0, k],
+          b_pred_reference[0, 1, k], b_pred_reference[0, 2, k],
+          b_pred_reference[0, 3, k])
+    print("ecart_pred-ref0", "ecart_pred_ref3", ecart_predicteur[0+I_REF, k],
+          ecart_predicteur[3+I_REF, k])
 
 
-def Affiche_Prediction(b_prediction_reference, coef_predicteur,
-                       memoire_moyenne_ana, b_prediction_analogie,
-                       b_prediction_parametre, b_prediction_meilleur,
-                       ecart_pred_meilleur, buffer):
+def Affiche_Parametre(buffer, b_pred_parametre, ecart_predicteur):
+
+    k = 0
+    print("pred-para0", "pred_para1", b_pred_parametre[0, 0, k],
+          b_pred_parametre[0, 1, k])
+    print("ecart_pred-para0", "ecart_pred_para1",
+          ecart_predicteur[0+I_PARAM, k], ecart_predicteur[1+I_PARAM, k])
+
+
+def Affiche_Vent(buffer, b_pred_vent, ecart_predicteur):
+
+    k = 0
+    print("pred-vent0", "pred_vent1",
+          b_pred_vent[0, 0, k], b_pred_vent[0, 1, k])
+    print("ecart_pred-vent0", "ecart_pred_vent1",
+          ecart_predicteur[0+I_VENT, k], ecart_predicteur[1+I_VENT, k])
+
+
+def Affiche_Algo(buffer, b_pred_algo, coef_algo, ecart_predicteur):
+
+    k = 0
+    print("pred-algo0", "pred_algo4",
+          b_pred_algo[0, 0, k], b_pred_algo[0, 1, k], b_pred_algo[0, 2, k],
+          b_pred_algo[0, 3, k], b_pred_algo[0, 4, k])
+    print("coef_algo0", "coef_algo3",
+          coef_algo[k, 0], coef_algo[k, 1], coef_algo[k, 2], coef_algo[k, 3])
+    print("ecart_pred-algo0", "ecart_pred_algo3",
+          ecart_predicteur[0+I_ALGO, k], ecart_predicteur[1+I_ALGO, k],
+          ecart_predicteur[2+I_ALGO, k], ecart_predicteur[3+I_ALGO, k])
+
+
+def Affiche_Prediction(b_pred_vent, b_pred_reference,
+                       coef_predicteur, memoire_moyenne_ana, b_pred_analogie,
+                       b_pred_parametre, b_pred_filtre, b_pred_meilleur,
+                       buffer, b_pred_tableau, ecart_predicteur, b_pred_algo,
+                       coef_algo):
 
     if DEBUG_PREDICTION1:
         k = 0
-        print("non filtre", "filtre", "b_pred_meil", "ecart_pred_meil")
+        print("non filtre", "filtre", "b_pred_meil", "ecart_pred_meil**2")
         print(buffer[NON_FILTRE, TAILLE_BUFFER], buffer[FILTRE, TAILLE_BUFFER],
-              b_prediction_meilleur[0, k], ecart_pred_meilleur[k]**2)
+              b_pred_meilleur[0, k], ecart_predicteur[I_MEILLEUR, k]**2)
         print("mem_ana(0) ... mem_ana(7)")
         print(memoire_moyenne_ana[0], memoire_moyenne_ana[1],
               memoire_moyenne_ana[2], memoire_moyenne_ana[3],
               memoire_moyenne_ana[4], memoire_moyenne_ana[5],
               memoire_moyenne_ana[6], memoire_moyenne_ana[7])
         print("pred-ref0", "pred_ref1", "pred_ref2")
-        print(b_prediction_reference[0, 0, k], b_prediction_reference[0, 1, k],
-              b_prediction_reference[0, 2, k])
+        print(b_pred_reference[0, 0, k], b_pred_reference[0, 1, k],
+              b_pred_reference[0, 2, k])
         print("coef_pred-ref0, coef_pred_ref1, coef_pred_ref2")
-        print(coef_predicteur[k, 0], coef_predicteur[k, 1],
-              coef_predicteur[k, 2])
+        print(coef_predicteur[k, 0+I_REF, 1], coef_predicteur[k, 1+I_REF, 1],
+              coef_predicteur[k, 2+I_REF, 1])
         j0 = round(memoire_moyenne_ana[0], 0)
         j1 = round(memoire_moyenne_ana[1], 0)
         j2 = round(memoire_moyenne_ana[2], 0)
@@ -132,32 +132,56 @@ def Affiche_Prediction(b_prediction_reference, coef_predicteur,
         j6 = round(memoire_moyenne_ana[6], 0)
         j7 = round(memoire_moyenne_ana[7], 0)
         print("pred-ana0, pred_ana1, pred_ana2, ....  pred_ana7")
-        print(b_prediction_analogie[0, 0, j0, k],
-              b_prediction_analogie[0, 1, j1, k],
-              b_prediction_analogie[0, 2, j2, k],
-              b_prediction_analogie[0, 3, j3, k],
-              b_prediction_analogie[0, 4, j4, k],
-              b_prediction_analogie[0, 5, j5, k],
-              b_prediction_analogie[0, 6, j6, k],
-              b_prediction_analogie[0, 7, j7, k])
+        print(b_pred_analogie[0, 0, j0, k],
+              b_pred_analogie[0, 1, j1, k],
+              b_pred_analogie[0, 2, j2, k],
+              b_pred_analogie[0, 3, j3, k],
+              b_pred_analogie[0, 4, j4, k],
+              b_pred_analogie[0, 5, j5, k],
+              b_pred_analogie[0, 6, j6, k],
+              b_pred_analogie[0, 7, j7, k])
         print("coef_pred-ana0, ana1, ana2, ... , ana7")
-        print(coef_predicteur[k, 0 + REF_SCENARIO],
-              coef_predicteur[k, 1 + REF_SCENARIO],
-              coef_predicteur[k, 2 + REF_SCENARIO],
-              coef_predicteur[k, 3 + REF_SCENARIO],
-              coef_predicteur[k, 4 + REF_SCENARIO],
-              coef_predicteur[k, 5 + REF_SCENARIO],
-              coef_predicteur[k, 6 + REF_SCENARIO],
-              coef_predicteur[k, 7 + REF_SCENARIO])
+        print(coef_predicteur[k, 0 + I_ANA, 1],
+              coef_predicteur[k, 1 + I_ANA, 1],
+              coef_predicteur[k, 2 + I_ANA, 1],
+              coef_predicteur[k, 3 + I_ANA, 1],
+              coef_predicteur[k, 4 + I_ANA, 1],
+              coef_predicteur[k, 5 + I_ANA, 1],
+              coef_predicteur[k, 6 + I_ANA, 1],
+              coef_predicteur[k, 7 + I_ANA, 1])
         print("pred-para0, pred_para1, pred_para2, pred_para3, pred_para4")
-        print(b_prediction_parametre[0, 0, k],
-              b_prediction_parametre[0, 1, k],
-              b_prediction_parametre[0, 2, k],
-              b_prediction_parametre[0, 3, k],
-              b_prediction_parametre[0, 4, k])
+        print(b_pred_parametre[0, 0, k],
+              b_pred_parametre[0, 1, k],
+              b_pred_parametre[0, 2, k],
+              b_pred_parametre[0, 3, k],
+              b_pred_parametre[0, 4, k])
         print("coef_pred-para0, para1, para2, para3, para4")
-        print(coef_predicteur[k, 0 + REF_SCENARIO + ANA_SCENARIO],
-              coef_predicteur[k, 1 + REF_SCENARIO + ANA_SCENARIO],
-              coef_predicteur[k, 2 + REF_SCENARIO + ANA_SCENARIO],
-              coef_predicteur[k, 3 + REF_SCENARIO + ANA_SCENARIO],
-              coef_predicteur[k, 4 + REF_SCENARIO + ANA_SCENARIO])
+        print(coef_predicteur[k, 0 + I_PARAM, 1],
+              coef_predicteur[k, 1 + I_PARAM, 1],
+              coef_predicteur[k, 2 + I_PARAM, 1],
+              coef_predicteur[k, 3 + I_PARAM, 1],
+              coef_predicteur[k, 4 + I_PARAM, 1])
+        print("pred-vent0, pred_vent1, pred_vent2, pred_vent3, pred_vent4")
+        print(b_pred_vent[0, 0, k],
+              b_pred_vent[0, 1, k],
+              b_pred_vent[0, 2, k],
+              b_pred_vent[0, 3, k],
+              b_pred_vent[0, 4, k])
+        print("coef_pred-vent0, vent1, vent2, vent3, vent4")
+        print(coef_predicteur[k, 0 + I_VENT, 1],
+              coef_predicteur[k, 1 + I_VENT, 1],
+              coef_predicteur[k, 2 + I_VENT, 1],
+              coef_predicteur[k, 3 + I_VENT, 1],
+              coef_predicteur[k, 4 + I_VENT, 1])
+        print("pred-algo0, pred_algo1, pred_algo2, pred_algo3, pred_algo4")
+        print(b_pred_algo[0, 0, k],
+              b_pred_algo[0, 1, k],
+              b_pred_algo[0, 2, k],
+              b_pred_algo[0, 3, k],
+              b_pred_algo[0, 4, k])
+        print("coef_pred-algo0, algo1, algo2, algo3, algo4")
+        print(coef_algo[k, 0],
+              coef_algo[k, 1],
+              coef_algo[k, 2],
+              coef_algo[k, 3],
+              coef_algo[k, 4])

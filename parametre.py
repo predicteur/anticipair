@@ -10,10 +10,11 @@ Procédures liées au prédicteur par paramètre
 from numpy import zeros, dot, linalg
 from constante import ANNEE_POINT, HEURE_POINT, HORIZON, \
     JOUR_POINT, MAXI, MOIS_POINT, NON_FILTRE, N_LIGNE, PARA_ECART_MC, \
-    PARA_HEURE, PARA_HORIZON_POINT, PRED_RESULTAT, TAILLE_BUFFER, TYPE_POINT
+    PARA_HEURE, PARA_HORIZON_POINT, PRED_RESULTAT, TAILLE_BUFFER, TYPE_POINT, \
+    PARA_V_VENT, V_VENT, VENT_PARANA
 
 
-def Mesure_Ecart_Parametre(ecart_pred_parametre, b_prediction_parametre,
+def Mesure_Ecart_Parametre(ecart_pred_parametre, b_pred_parametre,
                            horizon_pred, buffer):
 
     # ecart reel / valeurs predites avec horizon de prediction
@@ -22,26 +23,26 @@ def Mesure_Ecart_Parametre(ecart_pred_parametre, b_prediction_parametre,
     for j in range(PRED_RESULTAT):
         for k in range(HORIZON):
             ecart_pred_parametre[j, k] = \
-                abs(b_prediction_parametre[k, j, k] -
+                abs(b_pred_parametre[k, j, k] -
                     buffer[NON_FILTRE, TAILLE_BUFFER])
 
 
-def Decalage_Buffer_Pred_Parametre(b_prediction_parametre):
+def Decalage_Buffer_Pred_Parametre(b_pred_parametre):
 
     for i in range(TAILLE_BUFFER, 0, -1):
         for k in range(PRED_RESULTAT):
             for l in range(HORIZON):
-                b_prediction_parametre[i, k, l] = \
-                    b_prediction_parametre[i - 1, k, l]
+                b_pred_parametre[i, k, l] = b_pred_parametre[i - 1, k, l]
 
 
-def Predicteur_Parametre(resultat_parametre, b_prediction_parametre,
-                         memoire_param, donnees, buffer):
+def Predicteur_Parametre(resultat_parametre, b_pred_parametre,
+                         memoire_param, donnees, buffer, vitesse_vent,
+                         desactiv_vent):
 
     Cherche_Candidat_Parametre(resultat_parametre, memoire_param, donnees,
                                buffer)
-    Traite_Candidat_Parametre(b_prediction_parametre, donnees, buffer,
-                              resultat_parametre)
+    Traite_Candidat_Parametre(b_pred_parametre, donnees, buffer,
+                              resultat_parametre, vitesse_vent, desactiv_vent)
 
 
 def Cherche_Candidat_Parametre(resultat_parametre, memoire_param, donnees,
@@ -52,7 +53,7 @@ def Cherche_Candidat_Parametre(resultat_parametre, memoire_param, donnees,
     point_test = zeros((3), dtype=int)
 
     # initialisation des candidats - resultats
-    for i in range(PRED_RESULTAT):
+    for i in range(2*PRED_RESULTAT):
         resultat_parametre[PARA_HEURE, i] = 1
         resultat_parametre[PARA_ECART_MC, i] = MAXI
 
@@ -90,28 +91,28 @@ def Cherche_Candidat_Parametre(resultat_parametre, memoire_param, donnees,
                     (buffer[NON_FILTRE, point_reference[i]] -
                      donnees[NON_FILTRE, point_test[i]]) ** 2
 
-            # resultat de 0(meilleur) a PRED_RESULTAT-1[mauvais) ->non utilise!
-            if ecartmc < resultat_parametre[PARA_ECART_MC, PRED_RESULTAT - 1]:
-                resultat_parametre[PARA_HEURE, PRED_RESULTAT - 1] = n_test
-                resultat_parametre[PARA_ECART_MC, PRED_RESULTAT - 1] = ecartmc
-            for i in range(1, PRED_RESULTAT):
-                if resultat_parametre[PARA_ECART_MC, PRED_RESULTAT - i] < \
-                        resultat_parametre[PARA_ECART_MC, PRED_RESULTAT-i-1]:
-                    n_bouge = resultat_parametre[PARA_HEURE, PRED_RESULTAT-i]
+            # resultat de 0(meilleur) a 2*PRED_RESULTAT-1(mauvais)->non utilise
+            if ecartmc < resultat_parametre[PARA_ECART_MC, 2*PRED_RESULTAT-1]:
+                resultat_parametre[PARA_HEURE, 2*PRED_RESULTAT - 1] = n_test
+                resultat_parametre[PARA_ECART_MC, 2*PRED_RESULTAT-1] = ecartmc
+            for i in range(1, 2*PRED_RESULTAT):
+                if resultat_parametre[PARA_ECART_MC, 2*PRED_RESULTAT - i] < \
+                        resultat_parametre[PARA_ECART_MC, 2*PRED_RESULTAT-i-1]:
+                    n_bouge = resultat_parametre[PARA_HEURE, 2*PRED_RESULTAT-i]
                     ecartmc = \
-                        resultat_parametre[PARA_ECART_MC, PRED_RESULTAT-i]
-                    resultat_parametre[PARA_HEURE, PRED_RESULTAT - i] = \
-                        resultat_parametre[PARA_HEURE, PRED_RESULTAT-i-1]
-                    resultat_parametre[PARA_ECART_MC, PRED_RESULTAT - i] = \
-                        resultat_parametre[PARA_ECART_MC, PRED_RESULTAT-i-1]
-                    resultat_parametre[PARA_HEURE, PRED_RESULTAT-i-1] = \
+                        resultat_parametre[PARA_ECART_MC, 2*PRED_RESULTAT-i]
+                    resultat_parametre[PARA_HEURE, 2*PRED_RESULTAT - i] = \
+                        resultat_parametre[PARA_HEURE, 2*PRED_RESULTAT-i-1]
+                    resultat_parametre[PARA_ECART_MC, 2*PRED_RESULTAT - i] = \
+                        resultat_parametre[PARA_ECART_MC, 2*PRED_RESULTAT-i-1]
+                    resultat_parametre[PARA_HEURE, 2*PRED_RESULTAT-i-1] = \
                         n_bouge
-                    resultat_parametre[PARA_ECART_MC, PRED_RESULTAT-i-1] = \
+                    resultat_parametre[PARA_ECART_MC, 2*PRED_RESULTAT-i-1] = \
                         ecartmc
 
 
-def Traite_Candidat_Parametre(b_prediction_parametre, donnees, buffer,
-                              resultat_parametre):
+def Traite_Candidat_Parametre(b_pred_parametre, donnees, buffer,
+                              resultat_parametre, vitesse_vent, desactiv_vent):
 
     VALEUR_M_POINT = 0    # valeur du point
     APRES = 1    # sens de recherche
@@ -121,6 +122,36 @@ def Traite_Candidat_Parametre(b_prediction_parametre, donnees, buffer,
     point_predit = zeros((PRED_RESULTAT, 2, 2))  # 2e: info, 3e: n° futur
     point_carac = zeros((3), dtype=int)
     spline = zeros((4))  # coef du spline
+
+    # documentation des ecarts vv à partir de la vv au prochain point carac
+    for i in range(2 * PRED_RESULTAT):
+        resultat_parametre[PARA_V_VENT, i] = \
+            abs(donnees[V_VENT, resultat_parametre[PARA_HEURE, i] +
+                HORIZON - 1] - vitesse_vent[HORIZON - 1])
+
+    # tri des candidats (meilleur avec 0, moins bon 2*PRED_RESULTAT-1)
+    if VENT_PARANA and not desactiv_vent:
+        taille = 2 * PRED_RESULTAT - 1
+        ok = False
+        while not ok:
+            ok = True
+            for i in range(taille):
+                if resultat_parametre[PARA_V_VENT, i] > \
+                        resultat_parametre[PARA_V_VENT, i + 1]:
+                    paravvent = resultat_parametre[PARA_V_VENT, i]
+                    paraheure = resultat_parametre[PARA_HEURE, i]
+                    paraecartmc = resultat_parametre[PARA_ECART_MC, i]
+                    resultat_parametre[PARA_V_VENT, i] = \
+                        resultat_parametre[PARA_V_VENT, i + 1]
+                    resultat_parametre[PARA_HEURE, i] = \
+                        resultat_parametre[PARA_HEURE, i + 1]
+                    resultat_parametre[PARA_ECART_MC, i] = \
+                        resultat_parametre[PARA_ECART_MC, i + 1]
+                    resultat_parametre[PARA_V_VENT, i + 1] = paravvent
+                    resultat_parametre[PARA_HEURE, i + 1] = paraheure
+                    resultat_parametre[PARA_ECART_MC, i + 1] = paraecartmc
+                    ok = False
+            taille -= 1
 
     # points predits pour chaque type de resultat
     for j in range(PRED_RESULTAT):
@@ -163,13 +194,13 @@ def Traite_Candidat_Parametre(b_prediction_parametre, donnees, buffer,
         for i in range(1, point_dist1+1):
             if i == HORIZON + 1:
                 break
-            b_prediction_parametre[0, j, i - 1] = spline[0] + spline[1] * i + \
+            b_pred_parametre[0, j, i - 1] = spline[0] + spline[1] * i + \
                 spline[2] * i ** 2 + spline[3] * i ** 3
         Coef_Spline(spline, valeur1, valeur2, 0, 0, dist2 - dist1)
         for i in range(point_dist1 + 1, point_dist2 + 1):
             if i > HORIZON:
                 break
-            b_prediction_parametre[0, j, i - 1] = spline[0] + spline[1] * \
+            b_pred_parametre[0, j, i - 1] = spline[0] + spline[1] * \
                 (i - point_dist1) + spline[2] * (i - point_dist1) ** 2 + \
                 spline[3] * (i - point_dist1) ** 3
 
