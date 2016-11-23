@@ -22,11 +22,14 @@ from constante import ACTIVATION_ANA, ACTIVATION_PARAM, ACTIVATION_REF,\
     PCAIXC, PCCINQ, PCRABA, PCSTLO, PRED_RESULTAT, SEQUENCE, \
     SOIR, TAILLE_BUFFER, TIME_HEURE, TYPE_POINT, VAL_ANNEE, VAL_HEURE, \
     VAL_JOUR, VAL_MOIS, VAL_VALEUR, V_MOYENNE, V_PREDIC, V_PREDIC2, V_PREDIC3,\
-    REF_SCENARIO, I_ANA, I_PARAM, I_MEILLEUR, I_REF, I_VENT, I_ALGO
+    REF_SCENARIO, I_ANA, I_PARAM, I_MEILLEUR, I_REF, I_VENT, I_ALGO,\
+    VENT_SCENARIO, NB_ALGO, PRED_RANG, PRED_ECART
 
 
 def Affiche_Donnees_Traitees(donnees):
-
+    """
+    affichage de la bibliotheque
+    """
     print("heure", "non-filtre", "sequence", "type_point", "filtre")
     # for i in range(1, 10):
     for i in range(6184, 6204):
@@ -43,14 +46,18 @@ def Affiche_Donnees_Traitees(donnees):
 
 
 def Affiche_Buffer(buffer):
-
+    """
+    affichage du buffer
+    """
     print("non filtre", "filtre", "sequence", "type_point", "heure", "jour",
           "mois", "annee")
     print(buffer)
 
 
 def Affiche_Analogie(buffer, b_pred_analogie, ecart_predicteur):
-
+    """
+    affichage du predicteur analogie
+    """
     i = 6
     k = 0
     print("b_pred-ana0600", "b_pred_ana0640",
@@ -61,7 +68,9 @@ def Affiche_Analogie(buffer, b_pred_analogie, ecart_predicteur):
 
 
 def Affiche_Reference(buffer, b_pred_reference, ecart_predicteur):
-
+    """
+    affichage du predicteur reference
+    """
     k = 0
     print("pred-ref0...pred_ref3", b_pred_reference[0, 0, k],
           b_pred_reference[0, 1, k], b_pred_reference[0, 2, k],
@@ -71,7 +80,9 @@ def Affiche_Reference(buffer, b_pred_reference, ecart_predicteur):
 
 
 def Affiche_Parametre(buffer, b_pred_parametre, ecart_predicteur):
-
+    """
+    affichage du predicteur parametre
+    """
     k = 0
     print("pred-para0", "pred_para1", b_pred_parametre[0, 0, k],
           b_pred_parametre[0, 1, k])
@@ -80,7 +91,9 @@ def Affiche_Parametre(buffer, b_pred_parametre, ecart_predicteur):
 
 
 def Affiche_Vent(buffer, b_pred_vent, ecart_predicteur):
-
+    """
+    affichage du predicteur vent
+    """
     k = 0
     print("pred-vent0", "pred_vent1",
           b_pred_vent[0, 0, k], b_pred_vent[0, 1, k])
@@ -89,7 +102,9 @@ def Affiche_Vent(buffer, b_pred_vent, ecart_predicteur):
 
 
 def Affiche_Algo(buffer, b_pred_algo, coef_algo, ecart_predicteur):
-
+    """
+    affichage du predicteur algo
+    """
     k = 0
     print("pred-algo0", "pred_algo4",
           b_pred_algo[0, 0, k], b_pred_algo[0, 1, k], b_pred_algo[0, 2, k],
@@ -101,11 +116,129 @@ def Affiche_Algo(buffer, b_pred_algo, coef_algo, ecart_predicteur):
           ecart_predicteur[2+I_ALGO, k], ecart_predicteur[3+I_ALGO, k])
 
 
-def Affiche_Prediction(b_pred_vent, b_pred_reference,
-                       coef_predicteur, memoire_moyenne_ana, b_pred_analogie,
+def Affiche_Prediction(indice, mat_affic, mat_entete, b_pred_vent,
+                       b_pred_reference, coef_predicteur, memoire_moyenne_ana,
+                       b_pred_analogie,
                        b_pred_parametre, b_pred_filtre, b_pred_meilleur,
                        buffer, b_pred_tableau, ecart_predicteur, b_pred_algo,
                        coef_algo):
+    """
+    affichage des predicteurs
+    """
+    # calcul des positions de valeurs
+    p_pred_meilleur = 3 + 1
+    pos_memoire = p_pred_meilleur + 7
+    p_pred = pos_memoire + ANA_SCENARIO
+    p_pred_ana = p_pred + 2 * REF_SCENARIO
+    p_pred_param = p_pred_ana + 2 * ANA_SCENARIO
+    p_pred_vent = p_pred_param + 2 * PRED_RESULTAT
+    p_pred_algo = p_pred_vent + 2 * VENT_SCENARIO
+    p_pred_tableau = p_pred_algo + 3 * NB_ALGO
+    mat_entete[:] = " "
+
+    # generation de la matrice liee aux feuilles excel
+    mat_entete[0] = " "
+    mat_entete[1] = "serie"
+    mat_entete[2] = "filtre"
+    mat_entete[p_pred_meilleur + 0] = "pred meilleur"
+    mat_entete[p_pred_meilleur + 1] = "pred filtre"
+    mat_entete[p_pred_meilleur + 2] = "tendance"
+    mat_entete[p_pred_meilleur + 3] = "ecart meilleur"
+    mat_entete[p_pred_meilleur + 4] = "ecart tendance"
+    mat_entete[p_pred_meilleur + 5] = "ecart moyen"
+    mat_entete[p_pred_meilleur + 6] = "ecart moy filtre"
+    for i in range(ANA_SCENARIO):
+        mat_entete[pos_memoire + i] = "moy ana " + str(i)
+    for i in range(REF_SCENARIO):
+        mat_entete[p_pred + 2 * i] = "pred ref" + str(i)
+        mat_entete[p_pred + 2 * i + 1] = "coeff ref" + str(i)
+    for i in range(ANA_SCENARIO):
+        mat_entete[p_pred_ana + 2 * i] = "pred ana" + str(i)
+        mat_entete[p_pred_ana + 2 * i + 1] = "coeff ana" + str(i)
+    for i in range(PRED_RESULTAT):
+        mat_entete[p_pred_param + 2 * i] = "pred param" + str(i)
+        mat_entete[p_pred_param + 2 * i + 1] = "coeff param" + str(i)
+    for i in range(VENT_SCENARIO):
+        mat_entete[p_pred_vent + 2 * i] = "pred vent" + str(i)
+        mat_entete[p_pred_vent + 2 * i + 1] = "coeff vent" + str(i)
+    for i in range(NB_ALGO):
+        mat_entete[p_pred_algo + 3 * i] = "pred algo" + str(i)
+        mat_entete[p_pred_algo + 3 * i + 1] = "coeff algo" + str(i)
+        mat_entete[p_pred_algo + 3 * i + 2] = "ecart algo" + str(i)
+    for i in range(NB_PREDICTEURS):
+        mat_entete[p_pred_tableau + 2 * i + 1] = "tab rang" + str(i)
+        mat_entete[p_pred_tableau + 2 * i + 2] = "tab ecart" + str(i)
+
+    for k in range(HORIZON):
+        mat_affic[k, indice + 4, 1] = buffer[NON_FILTRE, TAILLE_BUFFER]
+        mat_affic[k, indice + 4, 2] = buffer[FILTRE, TAILLE_BUFFER]
+        mat_affic[k, indice + 4 + k, p_pred_meilleur+0] = b_pred_meilleur[0, k]
+        mat_affic[k, indice + 4 + k, p_pred_meilleur + 1] = b_pred_filtre[0, k]
+        # mat_affic[k, indice + 4 + k, p_pred_meilleur + 2] = tendance
+        mat_affic[k, indice + 4 + k, p_pred_meilleur + 3] = \
+            ecart_predicteur[I_MEILLEUR, k]
+        # mat_affic[k, indice + 4 + k, p_pred_meilleur + 4] = ecart
+        # mat_affic[k, indice + 4 + k, p_pred_meilleur + 5] = ecart_moyen[0]
+        # mat_affic[k, indice + 4 + k, p_pred_meilleur + 6] = ecart_moyen_f[0]
+        for i in range(ANA_SCENARIO):
+            mat_affic[k, indice+4+k, pos_memoire+i] = memoire_moyenne_ana[i]
+        for i in range(REF_SCENARIO):
+            mat_affic[k, indice+4+k, p_pred+2*i] = b_pred_reference[0, i, k]
+            # mat_affic[k, indice+4+k, p_pred+2*i+1] = \
+            #    ecart_predicteur[i+I_REF, k]
+            mat_affic[k, indice+4+k, p_pred+2*i+1] = coef_predicteur[k, i, 1]
+        for i in range(ANA_SCENARIO):
+            j = round(memoire_moyenne_ana[i], 0)
+            mat_affic[k, indice+4+k, p_pred_ana+2*i] = \
+                b_pred_analogie[0, i, j, k]
+            mat_affic[k, indice + 4 + k, p_pred_ana + 2 * i + 1] = \
+                coef_predicteur[k, i + I_ANA, 1]
+            # mat_affic[k, indice + 4 + k, p_pred_ana + 2 * i + 1] = \
+            #    ecart_predicteur[i + I_ANA, k]
+        for i in range(PRED_RESULTAT):
+            mat_affic[k, indice + 4 + k, p_pred_param + 2 * i] = \
+                b_pred_parametre[0, i, k]
+            mat_affic[k, indice + 4 + k, p_pred_param + 2 * i + 1] = \
+                coef_predicteur[k, i + I_PARAM, 1]
+            # mat_affic[k, indice + 4 + k, p_pred_param + 2 * i + 1] = \
+            #    ecart_predicteur[i + I_PARAM, k]
+        for i in range(VENT_SCENARIO):
+            mat_affic[k, indice+4+k, p_pred_vent+2*i] = b_pred_vent[0, i, k]
+            mat_affic[k, indice + 4 + k, p_pred_vent + 2 * i + 1] = \
+                coef_predicteur[k, i + I_VENT, 1]
+            # mat_affic[k, indice + 4 + k, p_pred_vent + 2 * i + 1] = \
+            #    ecart_predicteur[i + I_VENT, k]
+        for i in range(NB_ALGO):
+            mat_affic[k, indice+4+k, p_pred_algo+3*i] = b_pred_algo[0, i, k]
+            mat_affic[k, indice + 4 + k, p_pred_algo+3*i+1] = coef_algo[k, i]
+            mat_affic[k, indice+4+k, p_pred_algo+3*i+2] = \
+                ecart_predicteur[i + I_ALGO, k]
+        for i in range(NB_PREDICTEURS):
+            mat_affic[k, indice+4+k,
+                      p_pred_tableau+2*b_pred_tableau[0, PRED_RANG, i, k]+1] =\
+                i
+            mat_affic[k, indice+4+k,
+                      p_pred_tableau+2*b_pred_tableau[0, PRED_RANG, i, k]+2] =\
+                b_pred_tableau[0, PRED_ECART, i, k]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     if DEBUG_PREDICTION1:
         k = 0

@@ -14,7 +14,9 @@ from constante import HORIZON, NON_FILTRE, V_VENT, \
 
 
 def Decalage_Buffer_Pred_Vent(b_pred_vent):
-
+    """
+    decalage d'un pas de temps
+    """
     for i in range(TAILLE_BUFFER, 0, -1):
         for k in range(VENT_SCENARIO):
             for l in range(HORIZON):
@@ -23,7 +25,9 @@ def Decalage_Buffer_Pred_Vent(b_pred_vent):
 
 def Predicteur_Correlation_Vent(b_pred_vent, b_pred_meilleur, vitesse_vent,
                                 buffer):
-
+    """
+    calcul de la prediction vent
+    """
     for k in range(HORIZON):
         valeur_vent = 0.0
         valeur_mesure = 0.0

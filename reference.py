@@ -13,7 +13,9 @@ from constante import HORIZON, REF_SCENARIO, NON_FILTRE, TAILLE_BUFFER, \
 
 
 def Decalage_Buffer_Pred_Reference(b_pred_reference):
-
+    """
+    decalage d'un pas de temps
+    """
     for i in range(TAILLE_BUFFER, 0, -1):
         for k in range(REF_SCENARIO):
             for l in range(HORIZON):
@@ -22,7 +24,9 @@ def Decalage_Buffer_Pred_Reference(b_pred_reference):
 
 def Predicteur_Reference(b_pred_reference, b_pred_meilleur,
                          b_pred_filtre, buffer, min_max_seq):
-
+    """
+    calcul des valeurs des predicteurs de reference
+    """
     valeur_pred_ref = buffer[NON_FILTRE, TAILLE_BUFFER] + REF_PENTE * \
         (buffer[NON_FILTRE, TAILLE_BUFFER] -
          buffer[NON_FILTRE, TAILLE_BUFFER - 1])
@@ -47,7 +51,6 @@ def min_max(valeur, heure, min_max_seq):
     """
      limitation aux valeurs identifiées
     """
-
     heure = heure % 24
 
     if heure < DEB_MATIN:

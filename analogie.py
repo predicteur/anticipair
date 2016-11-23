@@ -16,31 +16,11 @@ from constante import ANA_ECART_MC, ANA_FILTRAGE, ANA_FILTRAGE_BIBLIO, \
     TAILLE_BUFFER, V_MOYENNE, ANA_V_VENT, V_VENT, VENT_PARANA
 
 
-def Mesure_Ecart_Analogie(ecart_pred_analogie, b_pred_analogie,
-                          ecart_analogie_global, horizon_pred, buffer):
-
-    # ecart reel / valeurs predites avec horizon de prediction pour chaque
-    # type de resultat
-    for i in range(ANA_SCENARIO):
-        for j in range(PRED_RESULTAT):
-            for k in range(HORIZON):
-                ecart_pred_analogie[i, j, k] = \
-                    abs(b_pred_analogie[k, i, j, k] -
-                        buffer[NON_FILTRE, TAILLE_BUFFER])
-
-    # ecart complet sur l horizon de prediction pour chaque type de resultat
-    for i in range(ANA_SCENARIO):
-        for j in range(PRED_RESULTAT):
-            ecart_analogie_global[i, j] = 0
-            for k in range(HORIZON):
-                ecart_analogie_global[i, j] += horizon_pred[k] * \
-                    ecart_pred_analogie[i, j, k] ** 2
-            ecart_analogie_global[i, j] = sqrt(ecart_analogie_global[i, j])
-
-
 def Apprentissage_Analogie(horizon_pred, b_pred_analogie, memoire_moyenne_ana,
                            buffer):
-
+    """
+    Procédures d apprentissage specifique du prédicteur par analogie
+    """
     ecart_pred_analogie = zeros((ANA_SCENARIO, PRED_RESULTAT, HORIZON))
     ecart_analogie_global = zeros((ANA_SCENARIO, PRED_RESULTAT))
 
@@ -74,7 +54,9 @@ def Apprentissage_Analogie(horizon_pred, b_pred_analogie, memoire_moyenne_ana,
 
 
 def Decalage_Buffer_Pred_Analogie(b_pred_analogie):
-
+    """
+    decalage d'un pas de temps de b_pred_analogie.
+    """
     for i in range(TAILLE_BUFFER, 0, -1):
         for j in range(ANA_SCENARIO):
             for k in range(PRED_RESULTAT):
@@ -85,6 +67,9 @@ def Decalage_Buffer_Pred_Analogie(b_pred_analogie):
 def Predicteur_Analogie(resultat_analogie, b_pred_analogie,
                         memoire_analogie, donnees, buffer, vitesse_vent,
                         desactiv_vent):
+    """
+    methode de prediction par analogie.
+    """
 
     for j in range(ANA_SCENARIO):
         Cherche_Candidat_Analogie(j, resultat_analogie, memoire_analogie,
@@ -95,7 +80,9 @@ def Predicteur_Analogie(resultat_analogie, b_pred_analogie,
 
 def Cherche_Candidat_Analogie(n_sce, resultat_analogie, memoire_analogie,
                               donnees, buffer):
-
+    """
+    recherche de sequence dans la bibliotheque pour le prediction par analogie
+    """
     actuel = zeros((ANA_PROFONDEUR))
     cas_test = zeros((ANA_PROFONDEUR))
 
@@ -145,12 +132,6 @@ def Cherche_Candidat_Analogie(n_sce, resultat_analogie, memoire_analogie,
                 ecartmc += memoire_analogie[i, n_sce] * \
                     (cas_test[i] - actuel[i]) ** 2
 
-            # if n_test == 15461 and n_sce == 6:
-                # print("ecartmc15461, n_sce", ecartmc, n_sce)
-                # for i in range(ANA_PROFONDEUR):
-                # print("mem-ana, cas-test, actuel",
-                # memoire_analogie[i, n_sce], cas_test[i], actuel[i])
-
             # res_analogie de 0(meilleur) a 2*resultat-1(mauvais)->non utilise!
             if ecartmc < resultat_analogie[ANA_ECART_MC, 2*PRED_RESULTAT - 1]:
                 resultat_analogie[ANA_HEURE, 2*PRED_RESULTAT-1] = n_test
@@ -172,7 +153,9 @@ def Cherche_Candidat_Analogie(n_sce, resultat_analogie, memoire_analogie,
 
 def Traite_Candidat_Analogie(n_sce, b_pred_analogie, resultat_analogie,
                              donnees, vitesse_vent, desactiv_vent):
-
+    """
+    traitement des sequences trouvees pour le predicteur par analogie
+    """
     for k in range(HORIZON):
 
         # documentation des ecarts vv
@@ -220,9 +203,3 @@ def Traite_Candidat_Analogie(n_sce, b_pred_analogie, resultat_analogie,
                 donnees[filtre_o_n, resultat_analogie[ANA_HEURE, j]+1+k]
         for j in range(PRED_RESULTAT):
             b_pred_analogie[0, n_sce, j, k] /= (j+1)
-
-        # if n_sce == 6:
-        # for j in range(5):
-            # print("b_pred_ana", j, b_pred_analogie[0, n_sce, j, 0], )
-            # print("res_ana et mc", resultat_analogie[ANA_HEURE, j],
-            # resultat_analogie[ANA_ECART_MC, j])
