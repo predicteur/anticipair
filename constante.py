@@ -10,6 +10,7 @@ Déclaration des constantes utilisées pour la prédiction
 from numpy import zeros, ones
 from datetime import timedelta, datetime
 
+
 #   constantes generales non ajustables (liees a la structure du programme)
 
 # donnees bibliotheque et buffer
@@ -69,8 +70,6 @@ MAXI = 10000000.0
 #  constantes ajustable (modifie le fonctionnement du programme)
 
 # bibliotheque : historique des donnees sur plusieurs annees
-# FILE_BIBLIO = """D:/LocalData/a179227/python/analyse de données/prediction/\
-# Biblio_2014-2015_export.csv"""
 FILE_BIBLIO = """./Biblio_2014-2015_export.csv"""
 
 N_LIGNE = 17520    # nombre de lignes du fichiers (donnees bibliotheque)
@@ -91,10 +90,8 @@ PCSTLO = 17  # colonne de la serie
 AIXVV = 18  # colonne de la serie
 
 # simulation : parametres de reglage
-N_RESULT = 40    # nombre de donnees traitees (9000), 90, 900
+N_RESULT = 1000    # nombre de donnees traitees (9000), 90, 900
 N_DEPART = 26    # premiere ligne des donnees traitees, 26
-N_AFFICHE = N_RESULT + 100  # nombre de lignes a afficher
-N_COLONNE = 200  # nombre de colonnes a afficher
 TAILLE_BUFFER = 24  # taille du buffer pour les donnees acquises et predites
 PARA_SENS = 1    # METTRE A -1 POUR LES SERIES O3 ET A 1 POUR LES AUTRES SERIES
 DEBUG_DONNEES = False  # export des donnees
@@ -106,12 +103,17 @@ DEBUG_VENT = False  # export des donnees vent
 DEBUG_ALGO = False  # export des donnees algo
 DEBUG_PREDICTION = False  # export des donnnees predites
 DEBUG_PREDICTION1 = False  # export des donnees predites h+1
-DEBUG_PREDICTION2 = False  # export des donnees predites h+2
-DEBUG_PREDICTION3 = False  # export des donnees predites h+3
-DEBUG_PREDICTION4 = False  # export des donnees predites h+4
-DEBUG_PREDICTION5 = False  # export des donnees predites h+5
-DEBUG_PREDICTION6 = False  # export des donnees predites h+6
+DEBUG_PREDICTION2 = True  # export des donnees predites h+2
+DEBUG_PREDICTION3 = True  # export des donnees predites h+3
+DEBUG_PREDICTION4 = True  # export des donnees predites h+4
+DEBUG_PREDICTION5 = True  # export des donnees predites h+5
+DEBUG_PREDICTION6 = True  # export des donnees predites h+6
 AFFICHE_HORIZON = 0    # horizon de prediction pour ana et para (0 a HORIZON-1)
+
+# fichier de debug des donnees
+FILE_DEBUG = """./debug_prediction"""
+N_AFFICHE = N_RESULT + 100  # nombre de lignes a afficher
+N_COLONNE = 200  # nombre de colonnes a afficher
 
 # predicteur vent : parametres de reglage
 VENT_SCENARIO = 5    # nombre de predicteurs vent (idem PRED_RESULTAT)
@@ -122,7 +124,7 @@ VENT_PARANA = True    # tri/vent des sequences testees pour pred para et ana
 
 # predicteur reference : parametres de reglage
 REF_SCENARIO = 4    # nombre de predicteurs de reference
-REF_PENTE = 1.    # pente du predicteurs de reference (par défaut valeur 1)
+REF_PENTE = 1.0    # pente du predicteurs de reference (par défaut valeur 1)
 
 # predicteur analogie : parametres de reglage
 ANA_PROFONDEUR = 8    # nombre d heures de comparaison
@@ -137,8 +139,8 @@ PARA_HORIZON_POINT = 20   # horizon de recherche des points (< a TAILLE_BUFFER)
 # traitement et prediction : parametres de reglage
 HORIZON = 6    # horizon de prediction (nombre d heures predites)
 V_PRED_MOYEN = 1  # moyenne histo des rangs des prédicteurs (0 :h, 1 :h et h-1)
-V_PENAL = 1.   # vitesse d evolution de la penalisation des mauvais predicteurs
-V_MEMOIRE = 1.    # vitesse d evolution - methode par ordre
+V_PENAL = 1.0   # vitesse evolution de la penalisation des mauvais predicteurs
+V_MEMOIRE = 1.0    # vitesse d evolution - methode par ordre
 V_ECART = 0.5    # vitesse d evolution - methode par ecart
 V_PREDIC = 0.05    # vitesse d evolution de la prediction : etait (0,08)
 V_PREDIC2 = 0.04    # vitesse d evolution de la prediction : etait (0,04)

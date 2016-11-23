@@ -47,12 +47,12 @@ def Analyse(valeur, buffer):
         res = -1
     if res == 0:
         if date_buffer == date_valeur:
-                    res = 0
+            res = 0
         elif date_buffer == DATE_INIT or \
                 date_valeur - date_buffer == TIME_HEURE:
-                    res = 1
+            res = 1
         else:
-                    res = -1
+            res = -1
 
         # test sommaire a renforcer ensuite ( a partir des minmax identifies)
         if valeur[VAL_VALEUR] < 0. or valeur[VAL_VALEUR] > 1000.:
@@ -62,7 +62,9 @@ def Analyse(valeur, buffer):
 
 
 def AcquisitionBuffer(valeur, vitesse_vent, buffer, b_pred_meilleur):
-
+    """
+    Acquisition des valeurs du buffer a partir de valeur et vitesse_vent
+    """
     # decalage d'un pas de temps des donnees : indice 0 -> la plus ancienne
     for i in range(TAILLE_BUFFER):
         buffer[NON_FILTRE, i] = buffer[NON_FILTRE, i + 1]
@@ -140,8 +142,10 @@ def AcquisitionBuffer(valeur, vitesse_vent, buffer, b_pred_meilleur):
 def Mesure_Ecart_Predicteur(ecart_predicteur, b_pred_algo, b_pred_vent,
                             b_pred_reference, b_pred_analogie,
                             b_pred_parametre, b_pred_meilleur, b_pred_filtre,
-                            horizon_pred, buffer, memoire_moyenne_ana):
-
+                            buffer, memoire_moyenne_ana):
+    """
+    Calcul de l'écart entre prediction et valeur mesurée
+    """
     # ecart reel / valeurs predites avec horizon de prediction
     # pour chaque type de resultat
 
@@ -173,10 +177,11 @@ def Mesure_Ecart_Predicteur(ecart_predicteur, b_pred_algo, b_pred_vent,
                                                        TAILLE_BUFFER])
 
 
-def Apprentissage_Prediction(ecart_predicteur, memoire_moyenne_ana,
-                             coef_predicteur, b_pred_tableau,
+def Apprentissage_Prediction(ecart_predicteur, coef_predicteur, b_pred_tableau,
                              memoire_pred, algo_param, desactiv_vent):
-
+    """
+    calcul des coeff des predicteurs algo a partir des predicteurs élémentaires
+    """
     tableau = zeros((2, NB_PREDICTEURS), dtype=int)
     rang_pred = zeros((V_PRED_MOYEN + 1, NB_PREDICTEURS), dtype=int)
     rang_moyen = zeros((NB_PREDICTEURS), dtype=int)
@@ -219,15 +224,15 @@ def Apprentissage_Prediction(ecart_predicteur, memoire_moyenne_ana,
             for i in range(taille):
                 if b_pred_tableau[0, PRED_ECART, i, k] > \
                    b_pred_tableau[0, PRED_ECART, i + 1, k]:
-                        interval = b_pred_tableau[0, PRED_ECART, i, k]
-                        interrang = b_pred_tableau[0, PRED_RANG, i, k]
-                        b_pred_tableau[0, PRED_ECART, i, k] = \
-                            b_pred_tableau[0, PRED_ECART, i + 1, k]
-                        b_pred_tableau[0, PRED_RANG, i, k] = \
-                            b_pred_tableau[0, PRED_RANG, i + 1, k]
-                        b_pred_tableau[0, PRED_ECART, i + 1, k] = interval
-                        b_pred_tableau[0, PRED_RANG, i + 1, k] = interrang
-                        ok = False
+                    interval = b_pred_tableau[0, PRED_ECART, i, k]
+                    interrang = b_pred_tableau[0, PRED_RANG, i, k]
+                    b_pred_tableau[0, PRED_ECART, i, k] = \
+                        b_pred_tableau[0, PRED_ECART, i + 1, k]
+                    b_pred_tableau[0, PRED_RANG, i, k] = \
+                        b_pred_tableau[0, PRED_RANG, i + 1, k]
+                    b_pred_tableau[0, PRED_ECART, i + 1, k] = interval
+                    b_pred_tableau[0, PRED_RANG, i + 1, k] = interrang
+                    ok = False
             taille = taille - 1
 
         # pointage invese du tableau (rangpred(n°pred) = rang)
@@ -267,8 +272,8 @@ def Apprentissage_Prediction(ecart_predicteur, memoire_moyenne_ana,
             if algo_param[j, N_ECART] > 0:
                 total = 0.0
                 for i in range(NB_PREDICTEURS):
-                    vitesse[k, i] = 1 / max(b_pred_tableau[0,
-                                            PRED_ECART, i, k], 0.01)
+                    vitesse[k, i] = 1 / max(b_pred_tableau[0, PRED_ECART,
+                                                           i, k], 0.01)
                     total += vitesse[k, i]
                 for i in range(NB_PREDICTEURS):
                     coef_predicteur[k, i, j] += algo_param[j, N_ECART] * \
@@ -320,7 +325,9 @@ def Apprentissage_Prediction(ecart_predicteur, memoire_moyenne_ana,
 
 def Decalage_Buffer_Pred_Meilleur(b_pred_filtre, b_pred_meilleur,
                                   b_pred_tableau):
-
+    """
+    décalage d'un pas de temps
+    """
     for i in range(TAILLE_BUFFER, 0, -1):
         for l in range(HORIZON):
             b_pred_meilleur[i, l] = b_pred_meilleur[i - 1, l]
@@ -331,7 +338,9 @@ def Decalage_Buffer_Pred_Meilleur(b_pred_filtre, b_pred_meilleur,
 
 
 def Decalage_Buffer_Pred_Algo(b_pred_algo):
-
+    """
+    décalage d'un pas de temps
+    """
     for i in range(TAILLE_BUFFER, 0, -1):
         for k in range(NB_ALGO):
             for l in range(HORIZON):
@@ -342,7 +351,9 @@ def Meilleure_Prediction(b_pred_algo, b_pred_filtre, b_pred_vent,
                          b_pred_meilleur, b_pred_reference, b_pred_analogie,
                          b_pred_parametre, coef_algo, coef_predicteur,
                          memoire_moyenne_ana, buffer):
-
+    """
+    calcul des prediction algo a partir des predicteurs elementaires
+    """
     # calcul des valeurs prévues par algorithme
     for l in range(NB_ALGO):
         for k in range(HORIZON):
@@ -352,10 +363,6 @@ def Meilleure_Prediction(b_pred_algo, b_pred_filtre, b_pred_vent,
             for i in range(REF_SCENARIO):
                 b_pred_algo[0, l, k] += coef_predicteur[k, i, l] * \
                     b_pred_reference[0, i, k]
-                #if k == 0:
-                #    print('bpredalgo, coefpred, bpredref', l, k, b_pred_algo[0, l, k],
-                #          coef_predicteur[k, i, l],
-                #          b_pred_reference[0, i, k])
 
             # valeur de predicteur analogie
             for i in range(ANA_SCENARIO):
@@ -389,7 +396,9 @@ def Meilleure_Prediction(b_pred_algo, b_pred_filtre, b_pred_vent,
 
 
 def Apprentissage_Algorithme(ecart_predicteur, coef_algo, memoire_pred):
-
+    """
+    calcul des coefficient du meilleur predicteur a partir des predicteurs algo
+    """
     tableau = zeros((2, NB_ALGO, HORIZON))
     vitesse = zeros((HORIZON, NB_ALGO))
 

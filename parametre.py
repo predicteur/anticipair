@@ -14,21 +14,10 @@ from constante import ANNEE_POINT, HEURE_POINT, HORIZON, \
     PARA_V_VENT, V_VENT, VENT_PARANA
 
 
-def Mesure_Ecart_Parametre(ecart_pred_parametre, b_pred_parametre,
-                           horizon_pred, buffer):
-
-    # ecart reel / valeurs predites avec horizon de prediction
-    # pour chaque type de resultat
-
-    for j in range(PRED_RESULTAT):
-        for k in range(HORIZON):
-            ecart_pred_parametre[j, k] = \
-                abs(b_pred_parametre[k, j, k] -
-                    buffer[NON_FILTRE, TAILLE_BUFFER])
-
-
 def Decalage_Buffer_Pred_Parametre(b_pred_parametre):
-
+    """
+    decalage d'un pas de temps de b_pred_parametre.
+    """
     for i in range(TAILLE_BUFFER, 0, -1):
         for k in range(PRED_RESULTAT):
             for l in range(HORIZON):
@@ -38,7 +27,9 @@ def Decalage_Buffer_Pred_Parametre(b_pred_parametre):
 def Predicteur_Parametre(resultat_parametre, b_pred_parametre,
                          memoire_param, donnees, buffer, vitesse_vent,
                          desactiv_vent):
-
+    """
+    methode de prediction par parametre.
+    """
     Cherche_Candidat_Parametre(resultat_parametre, memoire_param, donnees,
                                buffer)
     Traite_Candidat_Parametre(b_pred_parametre, donnees, buffer,
@@ -47,7 +38,9 @@ def Predicteur_Parametre(resultat_parametre, b_pred_parametre,
 
 def Cherche_Candidat_Parametre(resultat_parametre, memoire_param, donnees,
                                buffer):
-
+    """
+    recherche de sequence dans la bibliotheque pour le prediction par parametre
+    """
     AVANT = -1    # sens de recherche
     point_reference = zeros((3), dtype=int)
     point_test = zeros((3), dtype=int)
@@ -113,7 +106,9 @@ def Cherche_Candidat_Parametre(resultat_parametre, memoire_param, donnees,
 
 def Traite_Candidat_Parametre(b_pred_parametre, donnees, buffer,
                               resultat_parametre, vitesse_vent, desactiv_vent):
-
+    """
+    traitement des sequences trouvees pour le prediction par parametre
+    """
     VALEUR_M_POINT = 0    # valeur du point
     APRES = 1    # sens de recherche
     DIST_M_POINT = 1    # distance du point
@@ -127,7 +122,7 @@ def Traite_Candidat_Parametre(b_pred_parametre, donnees, buffer,
     for i in range(2 * PRED_RESULTAT):
         resultat_parametre[PARA_V_VENT, i] = \
             abs(donnees[V_VENT, resultat_parametre[PARA_HEURE, i] +
-                HORIZON - 1] - vitesse_vent[HORIZON - 1])
+                        HORIZON - 1] - vitesse_vent[HORIZON - 1])
 
     # tri des candidats (meilleur avec 0, moins bon 2*PRED_RESULTAT-1)
     if VENT_PARANA and not desactiv_vent:
@@ -175,10 +170,10 @@ def Traite_Candidat_Parametre(b_pred_parametre, donnees, buffer,
             point_predit[j, DIST_M_POINT, PRED_P2] += \
                 point_predit[j - 1, DIST_M_POINT, PRED_P2]
     for j in range(PRED_RESULTAT):
-            point_predit[j, VALEUR_M_POINT, PRED_P1] /= (j + 1)
-            point_predit[j, VALEUR_M_POINT, PRED_P2] /= (j + 1)
-            point_predit[j, DIST_M_POINT, PRED_P1] /= (j + 1)
-            point_predit[j, DIST_M_POINT, PRED_P2] /= (j + 1)
+        point_predit[j, VALEUR_M_POINT, PRED_P1] /= (j + 1)
+        point_predit[j, VALEUR_M_POINT, PRED_P2] /= (j + 1)
+        point_predit[j, DIST_M_POINT, PRED_P1] /= (j + 1)
+        point_predit[j, DIST_M_POINT, PRED_P2] /= (j + 1)
 
     # valeurs predites avec horizon de prediction pour chaque type de resultat
     for j in range(PRED_RESULTAT):
@@ -206,7 +201,10 @@ def Traite_Candidat_Parametre(b_pred_parametre, donnees, buffer,
 
 
 def Recherche_Point_Carac(n_cherche, sens, point_carac, donnee_a_traiter):
-
+    """
+    recherche de points caracteristiques d'une sequence
+    dans la prediction par parametre
+    """
     point_carac[0] = n_cherche
     point_a_trouver = 1
     for i in range(PARA_HORIZON_POINT+1):
@@ -216,13 +214,15 @@ def Recherche_Point_Carac(n_cherche, sens, point_carac, donnee_a_traiter):
                 point_a_trouver = point_a_trouver + 1
             elif abs(point_carac[point_a_trouver] -
                      point_carac[point_a_trouver - 1]) > 2:
-                        point_a_trouver = point_a_trouver + 1
+                point_a_trouver = point_a_trouver + 1
         if point_a_trouver == 3:
             break
 
 
 def Coef_Spline(spline, valeur1, valeur2, pente1, pente2, dist):
-
+    """
+    generation d'une courbe spline a partir de 2 vaeurs et 2 tangentes
+    """
     matrice = zeros((4, 4))
     mat_point = zeros((4, 1))
 

@@ -16,7 +16,6 @@ def Init_Bibliotheque(serie_a_traiter, donnees, min_max_seq):
     """
     chargement et initialisation de la bibliotheque
     """
-
     biblio = loadtxt(FILE_BIBLIO, delimiter=';', skiprows=1)
 
     donnees[NON_FILTRE, 0] = 0
@@ -55,7 +54,7 @@ def Init_Bibliotheque(serie_a_traiter, donnees, min_max_seq):
             donnees[SEQUENCE, i] = NUIT
             if (donnees[NON_FILTRE, i] > 1) and \
                (donnees[NON_FILTRE, i] < min_max_seq[NUIT, MIN_SEQ]):
-                    min_max_seq[NUIT, MIN_SEQ] = donnees[NON_FILTRE, i]
+                min_max_seq[NUIT, MIN_SEQ] = donnees[NON_FILTRE, i]
             elif donnees[NON_FILTRE, i] > min_max_seq[NUIT, MAX_SEQ]:
                 min_max_seq[NUIT, MAX_SEQ] = donnees[NON_FILTRE, i]
             if donnees[SEQUENCE, i - 1] != NUIT:
@@ -70,7 +69,7 @@ def Init_Bibliotheque(serie_a_traiter, donnees, min_max_seq):
             donnees[SEQUENCE, i] = MATIN
             if (donnees[NON_FILTRE, i] > 1) and \
                (donnees[NON_FILTRE, i] < min_max_seq[MATIN, MIN_SEQ]):
-                    min_max_seq[MATIN, MIN_SEQ] = donnees[NON_FILTRE, i]
+                min_max_seq[MATIN, MIN_SEQ] = donnees[NON_FILTRE, i]
             elif donnees[NON_FILTRE, i] > min_max_seq[MATIN, MAX_SEQ]:
                 min_max_seq[MATIN, MAX_SEQ] = donnees[NON_FILTRE, i]
             if donnees[SEQUENCE, i - 1] != MATIN:
@@ -85,7 +84,7 @@ def Init_Bibliotheque(serie_a_traiter, donnees, min_max_seq):
             donnees[SEQUENCE, i] = MIDI
             if (donnees[NON_FILTRE, i] > 1) and \
                (donnees[NON_FILTRE, i] < min_max_seq[MIDI, MIN_SEQ]):
-                    min_max_seq[MIDI, MIN_SEQ] = donnees[NON_FILTRE, i]
+                min_max_seq[MIDI, MIN_SEQ] = donnees[NON_FILTRE, i]
             elif donnees[NON_FILTRE, i] > min_max_seq[MIDI, MAX_SEQ]:
                 min_max_seq[MIDI, MAX_SEQ] = donnees[NON_FILTRE, i]
             if donnees[SEQUENCE, i - 1] != MIDI:
@@ -100,7 +99,7 @@ def Init_Bibliotheque(serie_a_traiter, donnees, min_max_seq):
             donnees[SEQUENCE, i] = SOIR
             if (donnees[NON_FILTRE, i] > 1) and \
                (donnees[NON_FILTRE, i] < min_max_seq[SOIR, MIN_SEQ]):
-                    min_max_seq[SOIR, MIN_SEQ] = donnees[NON_FILTRE, i]
+                min_max_seq[SOIR, MIN_SEQ] = donnees[NON_FILTRE, i]
             elif donnees[NON_FILTRE, i] > min_max_seq[SOIR, MAX_SEQ]:
                 min_max_seq[SOIR, MAX_SEQ] = donnees[NON_FILTRE, i]
             if donnees[SEQUENCE, i - 1] != SOIR:

@@ -28,7 +28,11 @@ from constante import ANNEE_POINT, FILTRE, HEURE_POINT, HORIZON, \
     DEBUG_ANALOGIE, DEBUG_BUFFER, DEBUG_DONNEES, DEBUG_PARAMETRE, N_ATTRIBUT,\
     N_LIGNE, NB_SEQ, C_MEM_PREDICTION, REF_SCENARIO, NB_ALGO, NB_ECART_PRED, \
     C_ALGO_PARAM, VENT_SCENARIO, DEBUG_REFERENCE, DEBUG_VENT, DEBUG_ALGO, \
-    ACTIVATION_VENT, VENT_PARANA
+    N_AFFICHE, N_COLONNE, FILE_DEBUG, DEBUG_PREDICTION2, DEBUG_PREDICTION3, \
+    DEBUG_PREDICTION4, DEBUG_PREDICTION5, DEBUG_PREDICTION6, N_RESULT, \
+    N_DEPART, AFFICHE_HORIZON, V_PREDIC, V_PREDIC2, V_PREDIC3, V_MOYENNE, \
+    ANA_PROFONDEUR, ANA_FILTRAGE, ANA_FILTRAGE_BIBLIO, PARA_PROFONDEUR, \
+    PARA_HORIZON_POINT
 
 
 class predicteur:
@@ -42,7 +46,6 @@ class predicteur:
         Initialisation des donnees :
                 initialisation des variables internes.
                 chargement de la bibliotheque et des buffers
-
         Entrees :
            serie_a_traiter : Numero de la serie de mesure concernee
            reset_prediction : Booleen avec remise a zero des buffers si True
@@ -102,9 +105,14 @@ class predicteur:
         self.buffer[HEURE_POINT, TAILLE_BUFFER] = 0
         self.serie = serie_a_traiter
 
+        # donnees a stocker pour debug
+        self.mat_affic = zeros((HORIZON, N_AFFICHE+1, N_COLONNE+1))
+        self.mat_entete = zeros((N_COLONNE+1), dtype='a15')
+        self.instant = 1
+
         # rechargement des parametres de h-1
         if reset_prediction is False:
-            nom_fichier = "serie" + str(serie_a_traiter)
+            nom_fichier = "serie" + str(self.serie)
             fichier = open(nom_fichier, "rb")
             self.b_pred_reference = load(fichier)
             self.b_pred_analogie = load(fichier)
@@ -127,12 +135,13 @@ class predicteur:
 
             entree :
                 valeur_mesuree : array avec annee, mois, jour, heure et valeur
+                vitesse-vent : array de [0] a [HORIZON]
             sortie :
                 Valeurs prédites de h+1 à h+ HORIZON
         """
-        self.desactiv_vent = False
+        desactiv_vent = False
         if all(vitesse_vent == -1):
-            self.desactiv_vent = True
+            desactiv_vent = True
 
         AcquisitionBuffer(valeur_mesuree, vitesse_vent, self.buffer,
                           self.b_pred_meilleur)
@@ -146,8 +155,7 @@ class predicteur:
                                 self.b_pred_vent, self.b_pred_reference,
                                 self.b_pred_analogie, self.b_pred_parametre,
                                 self.b_pred_meilleur, self.b_pred_filtre,
-                                self.horizon_pred, self.buffer,
-                                self.memoire_moyenne_ana)
+                                self.buffer, self.memoire_moyenne_ana)
 
         # affichage des donnees
         if DEBUG_ANALOGIE:
@@ -164,9 +172,11 @@ class predicteur:
         if DEBUG_ALGO:
             Affiche_Algo(self.buffer, self.b_pred_algo, self.coef_algo,
                          self.ecart_predicteur)
-        Affiche_Prediction(self.b_pred_vent,
-                           self.b_pred_reference, self.coef_predicteur,
-                           self.memoire_moyenne_ana, self.b_pred_analogie,
+        self.instant += 1
+        Affiche_Prediction(self.instant, self.mat_affic, self.mat_entete,
+                           self.b_pred_vent, self.b_pred_reference,
+                           self.coef_predicteur, self.memoire_moyenne_ana,
+                           self.b_pred_analogie,
                            self.b_pred_parametre, self.b_pred_filtre,
                            self.b_pred_meilleur, self.buffer,
                            self.b_pred_tableau, self.ecart_predicteur,
@@ -174,10 +184,9 @@ class predicteur:
 
         # ajustement des parametres d apprentissage
         Apprentissage_Prediction(self.ecart_predicteur,
-                                 self.memoire_moyenne_ana,
                                  self.coef_predicteur, self.b_pred_tableau,
                                  self.memoire_pred, self.algo_param,
-                                 self.desactiv_vent)
+                                 desactiv_vent)
         Apprentissage_Algorithme(self.ecart_predicteur, self.coef_algo,
                                  self.memoire_pred)
 
@@ -199,10 +208,10 @@ class predicteur:
                              self.buffer, self.min_max_seq)
         Predicteur_Analogie(self.resultat_analogie, self.b_pred_analogie,
                             self.memoire_analogie, self.donnees, self.buffer,
-                            vitesse_vent, self.desactiv_vent)
+                            vitesse_vent, desactiv_vent)
         Predicteur_Parametre(self.resultat_parametre, self.b_pred_parametre,
                              self.memoire_param, self.donnees, self.buffer,
-                             vitesse_vent, self.desactiv_vent)
+                             vitesse_vent, desactiv_vent)
         Meilleure_Prediction(self.b_pred_algo, self.b_pred_filtre,
                              self.b_pred_vent, self.b_pred_meilleur,
                              self.b_pred_reference, self.b_pred_analogie,
@@ -240,6 +249,7 @@ class predicteur:
                 si l'historique n'est pas suffisant (5 valeurs), retourne 0
             Entree :
                 Valeur_mesurée : array avec annee, mois, jour, heure et valeur
+                vitesse-vent : optionnel, array de [0] a [HORIZON]
             Sortie :
                 Valeurs prédites : array de h+1 à h+HORIZON
         """
@@ -253,8 +263,8 @@ class predicteur:
             resultat = self.b_pred_meilleur[0, :]
 
         # pas de restitution si historique insuffisant
-        #if self.buffer[NON_FILTRE, TAILLE_BUFFER-4] == 0 and validation != -1:
-        #    resultat = zeros((HORIZON))
+        if self.buffer[NON_FILTRE, TAILLE_BUFFER-4] == 0 and validation != -1:
+            resultat = zeros((HORIZON))
         return resultat
 
     def Prediction_Filtre(self, valeur_mesuree, vitesse_vent):
@@ -265,6 +275,7 @@ class predicteur:
                 si l'historique n'est pas suffisant (5 valeurs), retourne 0
             Entree :
                 valeur_mesuree : array avec annee, mois, jour, heure et valeur
+                vitesse-vent : optionnel, array de [0] a [HORIZON]
             Sortie :
                 valeurs prédites filtrees : array de h+1 à h+HORIZON
         """
@@ -280,8 +291,8 @@ class predicteur:
             resultat_filtre = self.b_pred_filtre[0, :]
 
         # pas de restitution si historique insuffisant
-        #if self.buffer[NON_FILTRE, TAILLE_BUFFER-4] == 0 and validation != -1:
-        #    resultat_filtre = zeros((HORIZON))
+        if self.buffer[NON_FILTRE, TAILLE_BUFFER-4] == 0 and validation != -1:
+            resultat_filtre = zeros((HORIZON))
         return resultat_filtre
 
     def Info_Date(self):
@@ -403,3 +414,65 @@ class predicteur:
                 ecart += abs(prevu - reel)
             ecart /= 3
         return ecart
+
+    def Debug_Pred(self):
+        """
+        Affichage des valeurs pour chaque pas de temps
+        Sortie :
+            écriture dans le fichier de debug
+        """
+        # calcul des positions de valeurs
+        p_pred_meilleur = 3 + 1
+        pos_memoire = p_pred_meilleur + 7
+        p_pred = pos_memoire + ANA_SCENARIO
+        p_pred_ana = p_pred + 2 * REF_SCENARIO
+        p_pred_param = p_pred_ana + 2 * ANA_SCENARIO
+        p_pred_vent = p_pred_param + 2 * PRED_RESULTAT
+        p_pred_algo = p_pred_vent + 2 * VENT_SCENARIO
+        p_pred_tableau = p_pred_algo + 3 * NB_ALGO
+
+        for k in range(HORIZON):
+            fichier = FILE_DEBUG + str(k) + '.csv'
+            if (k == 0) or \
+               (k == 1 and DEBUG_PREDICTION2) or \
+               (k == 2 and DEBUG_PREDICTION3) or \
+               (k == 3 and DEBUG_PREDICTION4) or \
+               (k == 4 and DEBUG_PREDICTION5) or \
+               (k == 5 and DEBUG_PREDICTION6):
+                with open(fichier, 'w') as fic:
+                    ligne = '  '
+                    ligne += "SERIE_TRAITEE " + str(self.serie) + ";"
+                    ligne += "N_RESULT " + str(N_RESULT) + ";"
+                    ligne += "N_DEPART " + str(N_DEPART) + ";"
+                    ligne + "AFFICHE_HORIZON " + str(AFFICHE_HORIZON) + ";"
+                    ligne += "V_PREDIC " + str(V_PREDIC) + ";"
+                    ligne += "V_PREDIC2 " + str(V_PREDIC2) + ";"
+                    ligne += "V_PREDIC3 " + str(V_PREDIC3) + ";"
+                    ligne += "HORIZON " + str(HORIZON) + ";"
+                    ligne += "V_MOYENNE " + str(V_MOYENNE) + ";"
+                    ligne += "PRED_RESULTAT " + str(PRED_RESULTAT) + ";"
+                    ligne += "TAILLE_BUFFER " + str(TAILLE_BUFFER) + ";"
+                    ligne += "N_RESULT " + str(N_RESULT) + ";"
+                    ligne += "ANA_PROFONDEUR " + str(ANA_PROFONDEUR) + ";"
+                    ligne += "ANA_FILTRAGE " + str(ANA_FILTRAGE) + ";"
+                    ligne += "ANA_SCENARIO " + str(ANA_SCENARIO) + ";"
+                    ligne += "ANA_FILT_BIBLI " + str(ANA_FILTRAGE_BIBLIO) + ";"
+                    ligne += "PARA_PROFONDEUR " + str(PARA_PROFONDEUR) + ";"
+                    ligne += "PARA_HORI_POINT " + str(PARA_HORIZON_POINT) + ";"
+                    ligne += "\n"
+                    fic.write(ligne)
+                    fic.write('  ' + '\n')
+                    ligne = '  '
+                    for col in range(1, p_pred_tableau + 2 * NB_PREDICTEURS):
+                        texte = str(self.mat_entete[col])
+                        ligne += texte[2:len(texte)-1] + ';'
+                    ligne += '\n' + '\n'
+                    fic.write(ligne)
+                    for lig in range(N_AFFICHE):
+                        ligne = '  '
+                        for col in range(1, N_COLONNE):
+                            ligne += str(self.mat_affic[k, lig, col]
+                                         ).replace(".", ",") + ';'
+                        ligne += '\n'
+                        fic.write(ligne)
+        return
