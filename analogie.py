@@ -35,7 +35,7 @@ def Apprentissage_Analogie(horizon_pred, b_pred_analogie, memoire_moyenne_ana,
     # ecart complet sur l horizon de prediction pour chaque type de resultat
     for i in range(ANA_SCENARIO):
         for j in range(PRED_RESULTAT):
-            ecart_analogie_global[i, j] = 0
+            ecart_analogie_global[i, j] = 0.0
             for k in range(HORIZON):
                 ecart_analogie_global[i, j] += horizon_pred[k] * \
                     ecart_pred_analogie[i, j, k] ** 2
@@ -88,9 +88,9 @@ def Cherche_Candidat_Analogie(n_sce, resultat_analogie, memoire_analogie,
 
     # initialisation des candidats - resultats
     for i in range(2 * PRED_RESULTAT):
-        resultat_analogie[ANA_HEURE, i] = 1
+        resultat_analogie[ANA_HEURE, i] = 1.0
         resultat_analogie[ANA_ECART_MC, i] = MAXI
-        resultat_analogie[ANA_V_VENT, i] = 0
+        resultat_analogie[ANA_V_VENT, i] = 0.0
 
     # initialisation des valeurs de reference (actuel)
     for i in range(ANA_PROFONDEUR):
@@ -127,7 +127,7 @@ def Cherche_Candidat_Analogie(n_sce, resultat_analogie, memoire_analogie,
         if abs(heure_test-heure_actuel) + abs(jour_test-jour_actuel) +\
                 abs(mois_test-mois_actuel) + abs(annee_test-annee_actuel) >\
                 0.5:
-            ecartmc = 0.
+            ecartmc = 0.0
             for i in range(ANA_PROFONDEUR):
                 ecartmc += memoire_analogie[i, n_sce] * \
                     (cas_test[i] - actuel[i]) ** 2

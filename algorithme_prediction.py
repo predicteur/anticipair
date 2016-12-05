@@ -55,7 +55,7 @@ def Analyse(valeur, buffer):
             res = -1
 
         # test sommaire a renforcer ensuite ( a partir des minmax identifies)
-        if valeur[VAL_VALEUR] < 0. or valeur[VAL_VALEUR] > 1000.:
+        if valeur[VAL_VALEUR] < 0. or valeur[VAL_VALEUR] > 1000.0:
             res = -1
 
     return res

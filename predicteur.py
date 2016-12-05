@@ -41,7 +41,7 @@ class predicteur:
     ces mesures.
     """
 
-    def __init__(self, serie_a_traiter, reset_prediction):
+    def __init__(self, serie_a_traiter, serie_vent, reset_prediction):
         """
         Initialisation des donnees :
                 initialisation des variables internes.
@@ -73,9 +73,9 @@ class predicteur:
         self.memoire_analogie = C_MEM_ANA
         # print(self.memoire_analogie[6, 7])
         self.memoire_moyenne_ana = ones((ANA_SCENARIO)) * \
-            (PRED_RESULTAT - 1) / 2
+            (PRED_RESULTAT - 1) / 2.0
         for i in range(ANA_SCENARIO):
-            self.memoire_moyenne_ana[i] = (PRED_RESULTAT - 1) / 2
+            self.memoire_moyenne_ana[i] = (PRED_RESULTAT - 1) / 2.0
         self.horizon_pred = zeros((HORIZON))
         self.horizon_pred[0] = 1.0
 
@@ -92,7 +92,8 @@ class predicteur:
         # donnees generales bibliotheque
         self.donnees = zeros((N_ATTRIBUT+1, N_LIGNE+1))
         self.min_max_seq = zeros((NB_SEQ+1, 2))
-        Init_Bibliotheque(serie_a_traiter, self.donnees, self.min_max_seq)
+        Init_Bibliotheque(serie_a_traiter, serie_vent, self.donnees,
+                          self.min_max_seq)
         # print('minmaxseq', self.min_max_seq)
         if DEBUG_DONNEES:
             Affiche_Donnees_Traitees(self.donnees)
@@ -140,7 +141,7 @@ class predicteur:
                 Valeurs prédites de h+1 à h+ HORIZON
         """
         desactiv_vent = False
-        if all(vitesse_vent == -1):
+        if all(vitesse_vent == -1.0):
             desactiv_vent = True
 
         AcquisitionBuffer(valeur_mesuree, vitesse_vent, self.buffer,
@@ -315,9 +316,9 @@ class predicteur:
             tendance : ecart des 2 dernieres
         """
         moyenne_actuelle = (self.buffer[NON_FILTRE, TAILLE_BUFFER] +
-                            self.buffer[NON_FILTRE, TAILLE_BUFFER-1]) / 2
+                            self.buffer[NON_FILTRE, TAILLE_BUFFER-1]) / 2.0
         moyenne_future = (self.b_pred_meilleur[0, 0] +
-                          self.b_pred_meilleur[0, 1]) / 2
+                          self.b_pred_meilleur[0, 1]) / 2.0
         tendance = moyenne_future - moyenne_actuelle
         return tendance
 
@@ -366,8 +367,8 @@ class predicteur:
                     self.buffer[NON_FILTRE, TAILLE_BUFFER - i]
                 ecart_moyen[0] += ecart_abs_i
                 ecart_moyen[1] += ecart_relatif_i
-            ecart_moyen[0] /= 5
-            ecart_moyen[1] /= 5
+            ecart_moyen[0] /= 5.0
+            ecart_moyen[1] /= 5.0
         return ecart_moyen
 
     def Ecart_Moyen_Filtre(self, horizon):
@@ -390,8 +391,8 @@ class predicteur:
                     self.buffer[FILTRE, TAILLE_BUFFER - i]
                 ecart_moyen_filtre[0] += ecart_abs_i
                 ecart_moyen_filtre[1] += ecart_relatif_i
-            ecart_moyen_filtre[0] /= 5
-            ecart_moyen_filtre[1] /= 5
+            ecart_moyen_filtre[0] /= 5.0
+            ecart_moyen_filtre[1] /= 5.0
         return ecart_moyen_filtre
 
     def Ecart_Tendance(self):
@@ -404,15 +405,15 @@ class predicteur:
         Sortie :
             ecart : moyenne des 3 ecarts
         """
-        ecart = 0.
+        ecart = 0.0
         if self.buffer[NON_FILTRE, 0] > 0.1:
             for t in range(2, 5):
                 prevu = (self.b_pred_meilleur[t, 0] +
-                         self.b_pred_meilleur[t, 1]) / 2
+                         self.b_pred_meilleur[t, 1]) / 2.0
                 reel = (self.buffer[NON_FILTRE, TAILLE_BUFFER-t+1] +
-                        self.buffer[NON_FILTRE, TAILLE_BUFFER-t+2]) / 2
+                        self.buffer[NON_FILTRE, TAILLE_BUFFER-t+2]) / 2.0
                 ecart += abs(prevu - reel)
-            ecart /= 3
+            ecart /= 3.0
         return ecart
 
     def Debug_Pred(self):
@@ -421,15 +422,6 @@ class predicteur:
         Sortie :
             écriture dans le fichier de debug
         """
-        # calcul des positions de valeurs
-        p_pred_meilleur = 3 + 1
-        pos_memoire = p_pred_meilleur + 7
-        p_pred = pos_memoire + ANA_SCENARIO
-        p_pred_ana = p_pred + 2 * REF_SCENARIO
-        p_pred_param = p_pred_ana + 2 * ANA_SCENARIO
-        p_pred_vent = p_pred_param + 2 * PRED_RESULTAT
-        p_pred_algo = p_pred_vent + 2 * VENT_SCENARIO
-        p_pred_tableau = p_pred_algo + 3 * NB_ALGO
 
         for k in range(HORIZON):
             fichier = FILE_DEBUG + str(k) + '.csv'
@@ -439,6 +431,8 @@ class predicteur:
                (k == 3 and DEBUG_PREDICTION4) or \
                (k == 4 and DEBUG_PREDICTION5) or \
                (k == 5 and DEBUG_PREDICTION6):
+
+                # parametres principaux en premiere ligne
                 with open(fichier, 'w') as fic:
                     ligne = '  '
                     ligne += "SERIE_TRAITEE " + str(self.serie) + ";"
@@ -462,12 +456,16 @@ class predicteur:
                     ligne += "\n"
                     fic.write(ligne)
                     fic.write('  ' + '\n')
+
+                    # entete des colonnes
                     ligne = '  '
-                    for col in range(1, p_pred_tableau + 2 * NB_PREDICTEURS):
+                    for col in range(1, N_COLONNE):
                         texte = str(self.mat_entete[col])
                         ligne += texte[2:len(texte)-1] + ';'
                     ligne += '\n' + '\n'
                     fic.write(ligne)
+
+                    # resultats par ligne
                     for lig in range(N_AFFICHE):
                         ligne = '  '
                         for col in range(1, N_COLONNE):

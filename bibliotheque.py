@@ -9,38 +9,38 @@ from numpy import loadtxt
 from constante import ANNEE_POINT, DEB_MATIN, DEB_MIDI, DEB_SOIR, FILE_BIBLIO,\
     FILTRE, HEURE_POINT, INTER_POINT, JOUR_POINT, MATIN, MAXI, MAX_SEQ, MIDI,\
     MIN_SEQ, MOIS_POINT, NB_SEQ, NON_FILTRE, NUIT, N_LIGNE, PARA_SENS, \
-    SEQUENCE, SOIR, TYPE_POINT, V_VENT, AIXVV
+    SEQUENCE, SOIR, TYPE_POINT, V_VENT
 
 
-def Init_Bibliotheque(serie_a_traiter, donnees, min_max_seq):
+def Init_Bibliotheque(serie_a_traiter, serie_vent, donnees, min_max_seq):
     """
     chargement et initialisation de la bibliotheque
     """
     biblio = loadtxt(FILE_BIBLIO, delimiter=';', skiprows=1)
 
-    donnees[NON_FILTRE, 0] = 0
-    donnees[FILTRE, 0] = 0
+    donnees[NON_FILTRE, 0] = 0.0
+    donnees[FILTRE, 0] = 0.0
     donnees[SEQUENCE, 0] = 0
     donnees[TYPE_POINT, 0] = 0
     donnees[HEURE_POINT, 0] = 0
     donnees[JOUR_POINT, 0] = 1
     donnees[MOIS_POINT, 0] = 1
     donnees[ANNEE_POINT, 0] = 1900
-    donnees[V_VENT, 0] = 0
+    donnees[V_VENT, 0] = 0.0
 
     donnees[NON_FILTRE, N_LIGNE] = 0
     donnees[FILTRE, N_LIGNE] = 0
 
     for i in range(1, NB_SEQ+1):
         min_max_seq[i, MIN_SEQ] = MAXI
-        min_max_seq[i, MAX_SEQ] = 0
+        min_max_seq[i, MAX_SEQ] = 0.0
 
     for i in range(1, N_LIGNE):
         donnees[HEURE_POINT, i] = biblio[i - 1, 3]
         donnees[JOUR_POINT, i] = biblio[i - 1, 2]
         donnees[MOIS_POINT, i] = biblio[i - 1, 1]
         donnees[ANNEE_POINT, i] = biblio[i - 1, 0]
-        donnees[V_VENT, i] = biblio[i - 1, AIXVV]
+        donnees[V_VENT, i] = biblio[i - 1, serie_vent]
         donnees[NON_FILTRE, i] = biblio[i - 1, serie_a_traiter]
         if i > 1:
             donnees[FILTRE, i - 1] = 0.5 * donnees[FILTRE, i - 2] + \

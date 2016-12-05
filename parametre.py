@@ -47,7 +47,7 @@ def Cherche_Candidat_Parametre(resultat_parametre, memoire_param, donnees,
 
     # initialisation des candidats - resultats
     for i in range(2*PRED_RESULTAT):
-        resultat_parametre[PARA_HEURE, i] = 1
+        resultat_parametre[PARA_HEURE, i] = 1.0
         resultat_parametre[PARA_ECART_MC, i] = MAXI
 
     # initialisation des points de reference (actuel)
@@ -231,24 +231,24 @@ def Coef_Spline(spline, valeur1, valeur2, pente1, pente2, dist):
     mat_point[2, 0] = pente1
     mat_point[3, 0] = pente2
 
-    matrice[0, 0] = 1
-    matrice[1, 0] = 1
-    matrice[2, 0] = 0
-    matrice[3, 0] = 0
+    matrice[0, 0] = 1.0
+    matrice[1, 0] = 1.0
+    matrice[2, 0] = 0.0
+    matrice[3, 0] = 0.0
 
-    matrice[0, 1] = 0
+    matrice[0, 1] = 0.0
     matrice[1, 1] = dist
-    matrice[2, 1] = 1
-    matrice[3, 1] = 1
+    matrice[2, 1] = 1.0
+    matrice[3, 1] = 1.0
 
-    matrice[0, 2] = 0
+    matrice[0, 2] = 0.0
     matrice[1, 2] = dist ** 2
-    matrice[2, 2] = 0
+    matrice[2, 2] = 0.0
     matrice[3, 2] = 2 * dist
 
-    matrice[0, 3] = 0
+    matrice[0, 3] = 0.0
     matrice[1, 3] = dist ** 3
-    matrice[2, 3] = 0
+    matrice[2, 3] = 0.0
     matrice[3, 3] = 3 * dist ** 2
 
     res_mat = dot(linalg.inv(matrice), mat_point)

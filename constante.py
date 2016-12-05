@@ -70,9 +70,15 @@ MAXI = 10000000.0
 #  constantes ajustable (modifie le fonctionnement du programme)
 
 # bibliotheque : historique des donnees sur plusieurs annees
-FILE_BIBLIO = """./Biblio_2014-2015_export.csv"""
-
-N_LIGNE = 17520    # nombre de lignes du fichiers (donnees bibliotheque)
+# fichier Morgan
+FILE_BIBLIO = """./apprentissage_Morgan.csv"""
+N_LIGNE = 13866    # nombre de lignes du fichiers (donnees bibliotheque)
+PCCINQ_MORGAN = 4  # colonne de la serie
+VV1_MORGAN = 5  # colonne de la serie
+VV2_MORGAN = 6  # colonne de la serie
+# fichier general
+# FILE_BIBLIO = """./Biblio_2014-2015_export.csv"""
+# N_LIGNE = 17520    # nombre de lignes du fichiers (donnees bibliotheque)
 N2AIXA = 4  # colonne de la serie
 N2AIXC = 5  # colonne de la serie
 N2CINQ = 6  # colonne de la serie
@@ -89,8 +95,9 @@ PCRABA = 16  # colonne de la serie
 PCSTLO = 17  # colonne de la serie
 AIXVV = 18  # colonne de la serie
 
+
 # simulation : parametres de reglage
-N_RESULT = 1000    # nombre de donnees traitees (9000), 90, 900
+N_RESULT = 3600    # nombre de donnees traitees (9000), 90, 900, 3600
 N_DEPART = 26    # premiere ligne des donnees traitees, 26
 TAILLE_BUFFER = 24  # taille du buffer pour les donnees acquises et predites
 PARA_SENS = 1    # METTRE A -1 POUR LES SERIES O3 ET A 1 POUR LES AUTRES SERIES
@@ -113,7 +120,7 @@ AFFICHE_HORIZON = 0    # horizon de prediction pour ana et para (0 a HORIZON-1)
 # fichier de debug des donnees
 FILE_DEBUG = """./debug_prediction"""
 N_AFFICHE = N_RESULT + 100  # nombre de lignes a afficher
-N_COLONNE = 200  # nombre de colonnes a afficher
+N_COLONNE = 600  # nombre de colonnes a afficher
 
 # predicteur vent : parametres de reglage
 VENT_SCENARIO = 5    # nombre de predicteurs vent (idem PRED_RESULTAT)
