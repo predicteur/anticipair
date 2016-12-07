@@ -97,7 +97,7 @@ AIXVV = 18  # colonne de la serie
 
 
 # simulation : parametres de reglage
-N_RESULT = 3600    # nombre de donnees traitees (9000), 90, 900, 3600
+N_RESULT = 100    # nombre de donnees traitees (9000), 90, 900, 3600
 N_DEPART = 26    # premiere ligne des donnees traitees, 26
 TAILLE_BUFFER = 24  # taille du buffer pour les donnees acquises et predites
 PARA_SENS = 1    # METTRE A -1 POUR LES SERIES O3 ET A 1 POUR LES AUTRES SERIES

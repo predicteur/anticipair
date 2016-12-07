@@ -7,11 +7,16 @@ Created on Sat Aug  6 13:19:04 2016
 Affichage des valeurs intermédiaires pour debug
 """
 
-from constante import ANA_SCENARIO, \
-    DEBUG_PREDICTION1, FILTRE, HEURE_POINT, HORIZON, \
-    NB_PREDICTEURS, NON_FILTRE, N_LIGNE, PRED_RESULTAT, SEQUENCE, \
-    TAILLE_BUFFER, TYPE_POINT, VENT_SCENARIO, NB_ALGO, \
-    REF_SCENARIO, I_ANA, I_PARAM, I_MEILLEUR, I_REF, I_VENT, I_ALGO
+from constante import ANA_SCENARIO, DEBUG_PREDICTION1, FILTRE, HEURE_POINT, \
+    HORIZON, NB_PREDICTEURS, NON_FILTRE, N_LIGNE, PRED_RESULTAT, SEQUENCE, \
+    TAILLE_BUFFER, TYPE_POINT, VENT_SCENARIO, NB_ALGO, REF_SCENARIO, \
+    I_ANA, I_PARAM, I_MEILLEUR, I_REF, I_VENT, I_ALGO, N_RESULT, \
+    N_DEPART, AFFICHE_HORIZON, V_PREDIC, V_PREDIC2, V_PREDIC3, V_MOYENNE, \
+    ANA_PROFONDEUR, ANA_FILTRAGE, ANA_FILTRAGE_BIBLIO, PARA_PROFONDEUR, \
+    PARA_HORIZON_POINT, FILE_BIBLIO, PARA_SENS, VENT_MIN, VENT_MAX, VENT_PRED,\
+    VENT_PARANA, REF_PENTE, V_PRED_MOYEN, V_PENAL, V_MEMOIRE, V_ECART, \
+    ACTIVATION_REF, ACTIVATION_ANA, ACTIVATION_PARAM, ACTIVATION_VENT, \
+    ACTIVATION_MAUVAIS, OPTI_ALGO
 
 
 def Affiche_Donnees_Traitees(donnees):
@@ -104,6 +109,65 @@ def Affiche_Algo(buffer, b_pred_algo, coef_algo, ecart_predicteur):
           ecart_predicteur[2+I_ALGO, k], ecart_predicteur[3+I_ALGO, k])
 
 
+def Affiche_Constante(serie):
+    """
+    affichage des constantes utilisees
+    """
+    ligne = '  '
+    ligne += "FILE_BIBLIO " + FILE_BIBLIO + ";"
+    ligne += "SERIE_TRAITEE " + str(serie) + ";"
+    ligne += "N_RESULT " + str(N_RESULT) + ";"
+    ligne += "N_DEPART " + str(N_DEPART) + ";"
+    ligne += "TAILLE_BUFFER " + str(TAILLE_BUFFER) + ";"
+    ligne += "PARA_SENS  " + str(PARA_SENS) + ";"
+    ligne + "AFFICHE_HORIZON " + str(AFFICHE_HORIZON) + ";"
+    ligne += "VENT_SCENARIO " + str(VENT_SCENARIO) + ";"
+    ligne += "VENT_MIN " + str(VENT_MIN) + ";"
+    ligne += "VENT_MAX " + str(VENT_MAX) + ";"
+    ligne += "VENT_PRED " + str(VENT_PRED) + ";"
+    ligne += "VENT_PARANA " + str(VENT_PARANA) + ";"
+    ligne += "REF_SCENARIO " + str(REF_SCENARIO) + ";"
+    ligne += "REF_PENTE " + str(REF_PENTE) + ";"
+    ligne += "ANA_PROFONDEUR " + str(ANA_PROFONDEUR) + ";"
+    ligne += "ANA_FILTRAGE " + str(ANA_FILTRAGE) + ";"
+    ligne += "ANA_FILT_BIBLI " + str(ANA_FILTRAGE_BIBLIO) + ";"
+    ligne += "ANA_SCENARIO " + str(ANA_SCENARIO) + ";"
+    ligne += "PARA_PROFONDEUR " + str(PARA_PROFONDEUR) + ";"
+    ligne += "PARA_HORI_POINT " + str(PARA_HORIZON_POINT) + ";"
+    ligne += "HORIZON " + str(HORIZON) + ";"
+    ligne += "V_PRED_MOYEN " + str(V_PRED_MOYEN) + ";"
+    ligne += "V_PENAL " + str(V_PENAL) + ";"
+    ligne += "V_MEMOIRE " + str(V_MEMOIRE) + ";"
+    ligne += "V_ECART " + str(V_ECART) + ";"
+    ligne += "V_PREDIC " + str(V_PREDIC) + ";"
+    ligne += "V_PREDIC2 " + str(V_PREDIC2) + ";"
+    ligne += "V_PREDIC3 " + str(V_PREDIC3) + ";"
+    ligne += "V_MOYENNE " + str(V_MOYENNE) + ";"
+    ligne += "ACTIVATION_REF " + str(ACTIVATION_REF) + ";"
+    ligne += "ACTIVATION_ANA " + str(ACTIVATION_ANA) + ";"
+    ligne += "ACTIVATION_PARAM " + str(ACTIVATION_PARAM) + ";"
+    ligne += "ACTIVATION_VENT " + str(ACTIVATION_VENT) + ";"
+    ligne += "ACTIVATION_MAUVAIS " + str(ACTIVATION_MAUVAIS) + ";"
+    ligne += "PRED_RESULTAT " + str(PRED_RESULTAT) + ";"
+    ligne += "NB_ALGO " + str(NB_ALGO) + ";"
+    ligne += "OPTI_ALGO " + str(OPTI_ALGO) + ";"
+
+    return ligne
+
+
+def Affiche_Prediction_Complement(indice, mat_affic, tendance, ecart_tendance,
+                                  ecart_moyen, ecart_moyen_f):
+    """
+    complement affichage des predicteurs pour H+1
+    """
+    p_pred_meilleur = 3 + 1
+    k = 0
+    mat_affic[k, indice + 4 + k, p_pred_meilleur + 2] = tendance
+    mat_affic[k, indice + 4 + k, p_pred_meilleur + 4] = ecart_tendance
+    mat_affic[k, indice + 4 + k, p_pred_meilleur + 5] = ecart_moyen[0]
+    mat_affic[k, indice + 4 + k, p_pred_meilleur + 6] = ecart_moyen_f[0]
+
+
 def Affiche_Prediction(indice, mat_affic, mat_entete, b_pred_vent,
                        b_pred_reference, coef_predicteur, memoire_moyenne_ana,
                        b_pred_analogie,
@@ -157,9 +221,6 @@ def Affiche_Prediction(indice, mat_affic, mat_entete, b_pred_vent,
         for j in range(NB_ALGO):
             mat_entete[p_pred_tableau+i*NB_ALGO+j] = "coef pr" + str(i)\
                 + " al" + str(j) + " "
-    # for i in range(NB_PREDICTEURS):
-    #     mat_entete[p_pred_tableau + 2 * i + 1] = "tab rang" + str(i)
-    #     mat_entete[p_pred_tableau + 2 * i + 2] = "tab ecart" + str(i)
 
     # generation de la matrice liee aux resultats par colonnes
     for k in range(HORIZON):
@@ -167,12 +228,8 @@ def Affiche_Prediction(indice, mat_affic, mat_entete, b_pred_vent,
         mat_affic[k, indice + 4, 2] = buffer[FILTRE, TAILLE_BUFFER]
         mat_affic[k, indice + 4 + k, p_pred_meilleur+0] = b_pred_meilleur[0, k]
         mat_affic[k, indice + 4 + k, p_pred_meilleur + 1] = b_pred_filtre[0, k]
-        # mat_affic[k, indice + 4 + k, p_pred_meilleur + 2] = tendance
         mat_affic[k, indice + 4 + k, p_pred_meilleur + 3] = \
             ecart_predicteur[I_MEILLEUR, k]
-        # mat_affic[k, indice + 4 + k, p_pred_meilleur + 4] = ecart
-        # mat_affic[k, indice + 4 + k, p_pred_meilleur + 5] = ecart_moyen[0]
-        # mat_affic[k, indice + 4 + k, p_pred_meilleur + 6] = ecart_moyen_f[0]
         for i in range(ANA_SCENARIO):
             mat_affic[k, indice+4+k, pos_memoire+i] = memoire_moyenne_ana[i]
         for i in range(REF_SCENARIO):

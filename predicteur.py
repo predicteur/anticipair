@@ -14,7 +14,8 @@ from algorithme_prediction import AcquisitionBuffer, Mesure_Ecart_Predicteur, \
     Apprentissage_Algorithme
 from affiche import Affiche_Buffer, Affiche_Donnees_Traitees, \
     Affiche_Analogie, Affiche_Parametre, Affiche_Reference, \
-    Affiche_Prediction, Affiche_Vent, Affiche_Algo
+    Affiche_Prediction, Affiche_Vent, Affiche_Algo, Affiche_Constante, \
+    Affiche_Prediction_Complement
 from analogie import Apprentissage_Analogie, Decalage_Buffer_Pred_Analogie, \
     Predicteur_Analogie
 from parametre import Decalage_Buffer_Pred_Parametre, Predicteur_Parametre
@@ -29,10 +30,7 @@ from constante import ANNEE_POINT, FILTRE, HEURE_POINT, HORIZON, \
     N_LIGNE, NB_SEQ, C_MEM_PREDICTION, REF_SCENARIO, NB_ALGO, NB_ECART_PRED, \
     C_ALGO_PARAM, VENT_SCENARIO, DEBUG_REFERENCE, DEBUG_VENT, DEBUG_ALGO, \
     N_AFFICHE, N_COLONNE, FILE_DEBUG, DEBUG_PREDICTION2, DEBUG_PREDICTION3, \
-    DEBUG_PREDICTION4, DEBUG_PREDICTION5, DEBUG_PREDICTION6, N_RESULT, \
-    N_DEPART, AFFICHE_HORIZON, V_PREDIC, V_PREDIC2, V_PREDIC3, V_MOYENNE, \
-    ANA_PROFONDEUR, ANA_FILTRAGE, ANA_FILTRAGE_BIBLIO, PARA_PROFONDEUR, \
-    PARA_HORIZON_POINT
+    DEBUG_PREDICTION4, DEBUG_PREDICTION5, DEBUG_PREDICTION6
 
 
 class predicteur:
@@ -219,6 +217,10 @@ class predicteur:
                              self.b_pred_parametre, self.coef_algo,
                              self.coef_predicteur, self.memoire_moyenne_ana,
                              self.buffer)
+        Affiche_Prediction_Complement(self.instant, self.mat_affic,
+                                      self.Tendance(), self.Ecart_Tendance(),
+                                      self.Ecart_Moyen(),
+                                      self.Ecart_Moyen_Filtre())
 
         # stockage des parametres
         nom_fichier = "serie" + str(self.serie)
@@ -347,7 +349,7 @@ class predicteur:
         histo_filtre = self.buffer[FILTRE, 0:TAILLE_BUFFER+1]
         return histo_filtre
 
-    def Ecart_Moyen(self, horizon):
+    def Ecart_Moyen(self, horizon=1):
         """
         Moyenne des ecarts absolus et relatif des 5 dernières predictions
         pour un horizon donne (1 par defaut).
@@ -371,7 +373,7 @@ class predicteur:
             ecart_moyen[1] /= 5.0
         return ecart_moyen
 
-    def Ecart_Moyen_Filtre(self, horizon):
+    def Ecart_Moyen_Filtre(self, horizon=1):
         """
         Moyenne des ecarts absolus et relatif des 5 dernières predictions
         filtrees pour un horizon donne (1 par defaut).
@@ -434,25 +436,7 @@ class predicteur:
 
                 # parametres principaux en premiere ligne
                 with open(fichier, 'w') as fic:
-                    ligne = '  '
-                    ligne += "SERIE_TRAITEE " + str(self.serie) + ";"
-                    ligne += "N_RESULT " + str(N_RESULT) + ";"
-                    ligne += "N_DEPART " + str(N_DEPART) + ";"
-                    ligne + "AFFICHE_HORIZON " + str(AFFICHE_HORIZON) + ";"
-                    ligne += "V_PREDIC " + str(V_PREDIC) + ";"
-                    ligne += "V_PREDIC2 " + str(V_PREDIC2) + ";"
-                    ligne += "V_PREDIC3 " + str(V_PREDIC3) + ";"
-                    ligne += "HORIZON " + str(HORIZON) + ";"
-                    ligne += "V_MOYENNE " + str(V_MOYENNE) + ";"
-                    ligne += "PRED_RESULTAT " + str(PRED_RESULTAT) + ";"
-                    ligne += "TAILLE_BUFFER " + str(TAILLE_BUFFER) + ";"
-                    ligne += "N_RESULT " + str(N_RESULT) + ";"
-                    ligne += "ANA_PROFONDEUR " + str(ANA_PROFONDEUR) + ";"
-                    ligne += "ANA_FILTRAGE " + str(ANA_FILTRAGE) + ";"
-                    ligne += "ANA_SCENARIO " + str(ANA_SCENARIO) + ";"
-                    ligne += "ANA_FILT_BIBLI " + str(ANA_FILTRAGE_BIBLIO) + ";"
-                    ligne += "PARA_PROFONDEUR " + str(PARA_PROFONDEUR) + ";"
-                    ligne += "PARA_HORI_POINT " + str(PARA_HORIZON_POINT) + ";"
+                    ligne = Affiche_Constante(self.serie)
                     ligne += "\n"
                     fic.write(ligne)
                     fic.write('  ' + '\n')
