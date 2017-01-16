@@ -4,17 +4,53 @@ Created on Sat Jul 30 17:02:00 2016
 
 @author: Philippe
 
-Déclaration des constantes utilisées pour la prédiction
+Déclaration des constantes utilisées pour la classe prédicteur.
+    partie 1 : parametres de simulation
+    partie 2 : constantes générales non modifiables
+    partie 3 : constantes ajustables (modifient le fonctionnement du programme)
+    partie 4 : constantes deduites
+    partie 5 : initialisation des valeurs des coefficients d ajustement
 """
 
 from numpy import zeros, ones
 from datetime import timedelta, datetime
 
+#   parametres lies a la simulation
 
-#   constantes generales non ajustables (liees a la structure du programme)
+# simulation : parametres de reglage
+T_BUFFER = 96  # taille du buffer pour les donnees acquises et predites
+PARA_SENS = 1    # METTRE A -1 POUR LES SERIES O3 ET A 1 POUR LES AUTRES SERIES
+HORIZON = 6    # horizon de prediction (nombre d heures predites)
+ACTIVATION_REF = True    # activation predicteur de reference
+ACTIVATION_ANA = True    # activation predicteur analogie
+ACTIVATION_PARAM = True    # activation predicteur parametre
+ACTIVATION_VENT = True    # activation predicteur vent
+ACTIVATION_MODELE = True    # activation predicteur modele
+ACTIVATION_MAUVAIS = False  # penalisation preds mauvais / algos optimisation
+# simulation : affichage d'informations
+DEBUG_DONNEES = False  # print des donnees
+DEBUG_BUFFER = False  # print des buffer
+DEBUG_ANALOGIE = False  # print des donnees analogie
+DEBUG_PARAMETRE = False  # print des donnees parametre
+DEBUG_REFERENCE = False  # print des donnees reference
+DEBUG_VENT = False  # print des donnees vent
+DEBUG_MODELE = False  # print des donnees modele
+DEBUG_ALGO = False  # print des donnees algo
+# simulation : export des donnees inermediaires dans un fichier
+DEBUG_PREDICTION1 = True  # export des donnees predites h+1
+DEBUG_PREDICTION2 = True  # export des donnees predites h+2
+DEBUG_PREDICTION3 = True  # export des donnees predites h+3
+DEBUG_PREDICTION4 = True  # export des donnees predites h+4
+DEBUG_PREDICTION5 = True  # export des donnees predites h+5
+DEBUG_PREDICTION6 = True  # export des donnees predites h+6
+AFFICHE_HORIZON = 0    # horizon pour les print (0 a HORIZON-1)
 
+#   constantes generales non modifiables (liees a la structure du programme)
+
+# donnees fichier de debug
+N_AFFICHE = 4000   # nombre de lignes a afficher -> prendre N_RESULT + 100
 # donnees bibliotheque et buffer
-N_ATTRIBUT = 8    # nombre d attributs pour les donnees et pour buffer
+N_ATTRIBUT = 11    # nombre d attributs pour les donnees et pour buffer
 NON_FILTRE = 0    # valeur non filtrees
 FILTRE = 1    # valeur filtrees
 SEQUENCE = 2  # sequence(1 nuit 0-5, 2 matin 6-10, 3 midi 11-16, 4 soir 17-23)
@@ -38,6 +74,9 @@ MIN_SEQ = 0    # mini de la sequence
 MAX_SEQ = 1    # maxi de la sequence
 NB_SEQ = 4    # nombre de sequences
 V_VENT = 8    # valeur de la vitesse du vent
+V_MODELE = 9    # valeur issue de la modelisation
+ECART = 10    # ecart valeur de t moins valeur de t-1
+ECRETE = 11    # valeur avec pic ecrete
 # predicteur analogie
 ANA_HEURE = 0    # heure du resultat
 ANA_ECART_MC = 1    # ecart MC du resultat
@@ -67,84 +106,35 @@ DATE_INIT = datetime(1900, 1, 1, 0)
 TIME_HEURE = timedelta(0, 3600)
 MAXI = 10000000.0
 
-#  constantes ajustable (modifie le fonctionnement du programme)
+#  constantes ajustables (modifient le fonctionnement du programme)
 
-# bibliotheque : historique des donnees sur plusieurs annees
-# fichier Morgan
-FILE_BIBLIO = """./apprentissage_Morgan.csv"""
-N_LIGNE = 13866    # nombre de lignes du fichiers (donnees bibliotheque)
-PCCINQ_MORGAN = 4  # colonne de la serie
-VV1_MORGAN = 5  # colonne de la serie
-VV2_MORGAN = 6  # colonne de la serie
-# fichier general
-# FILE_BIBLIO = """./Biblio_2014-2015_export.csv"""
-# N_LIGNE = 17520    # nombre de lignes du fichiers (donnees bibliotheque)
-N2AIXA = 4  # colonne de la serie
-N2AIXC = 5  # colonne de la serie
-N2CINQ = 6  # colonne de la serie
-N2PLOM = 7  # colonne de la serie
-N2RABA = 8  # colonne de la serie
-N2STLO = 9  # colonne de la serie
-O3AIXA = 10  # colonne de la serie
-O3AIXP = 11  # colonne de la serie
-O3CINQ = 12  # colonne de la serie
-PCAIXA = 13  # colonne de la serie
-PCAIXC = 14  # colonne de la serie
-PCCINQ = 15  # colonne de la serie
-PCRABA = 16  # colonne de la serie
-PCSTLO = 17  # colonne de la serie
-AIXVV = 18  # colonne de la serie
-
-
-# simulation : parametres de reglage
-N_RESULT = 100    # nombre de donnees traitees (9000), 90, 900, 3600
-N_DEPART = 26    # premiere ligne des donnees traitees, 26
-TAILLE_BUFFER = 24  # taille du buffer pour les donnees acquises et predites
-PARA_SENS = 1    # METTRE A -1 POUR LES SERIES O3 ET A 1 POUR LES AUTRES SERIES
-DEBUG_DONNEES = False  # export des donnees
-DEBUG_BUFFER = False  # export des buffer
-DEBUG_ANALOGIE = False  # export des donnees analogie
-DEBUG_PARAMETRE = False  # export des donnees parametre
-DEBUG_REFERENCE = False  # export des donnees reference
-DEBUG_VENT = False  # export des donnees vent
-DEBUG_ALGO = False  # export des donnees algo
-DEBUG_PREDICTION = False  # export des donnnees predites
-DEBUG_PREDICTION1 = False  # export des donnees predites h+1
-DEBUG_PREDICTION2 = True  # export des donnees predites h+2
-DEBUG_PREDICTION3 = True  # export des donnees predites h+3
-DEBUG_PREDICTION4 = True  # export des donnees predites h+4
-DEBUG_PREDICTION5 = True  # export des donnees predites h+5
-DEBUG_PREDICTION6 = True  # export des donnees predites h+6
-AFFICHE_HORIZON = 0    # horizon de prediction pour ana et para (0 a HORIZON-1)
-
-# fichier de debug des donnees
-FILE_DEBUG = """./debug_prediction"""
-N_AFFICHE = N_RESULT + 100  # nombre de lignes a afficher
-N_COLONNE = 600  # nombre de colonnes a afficher
-
+# predicteurs : parametres de reglage commun
+BUF_SERIE = NON_FILTRE  # donnees pour buffer : ECRETE, FILTRE ou NON_FILTRE
+BIB_SERIE = NON_FILTRE  # donnees pour biblio : ECRETE, FILTRE ou NON_FILTRE
+SEUIL_ECRETAGE = 95  # % de limitation des ecarts (pics) pour l'option ECRETE
 # predicteur vent : parametres de reglage
 VENT_SCENARIO = 5    # nombre de predicteurs vent (idem PRED_RESULTAT)
 VENT_MIN = 0.8    # seuil min vitesse vent (était 0,8)
 VENT_MAX = 3.3    # seuil max vitesse vent (était 3,3)
 VENT_PRED = True  # activation sur les valeurs prédites (false->dernières vals)
 VENT_PARANA = True    # tri/vent des sequences testees pour pred para et ana
-
+# predicteur modele : parametres de reglage
+MODELE_SCENARIO = 5    # nombre de predicteurs modele (idem PRED_RESULTAT)
+MODELE_MIN = 0.8    # seuil min valeur modele (était 0,8)
+MODELE_PRED = True  # activation sur les valeurs prédites (false->derns vals)
 # predicteur reference : parametres de reglage
 REF_SCENARIO = 4    # nombre de predicteurs de reference
 REF_PENTE = 1.0    # pente du predicteurs de reference (par défaut valeur 1)
-
+REF_MOYENNE = T_BUFFER  # moyenne du predicteurs de reference
 # predicteur analogie : parametres de reglage
+PRED_RESULTAT = 5   # nombre de meilleurs candidats conserves pour ana et param
 ANA_PROFONDEUR = 8    # nombre d heures de comparaison
-ANA_FILTRAGE = False    # utilisation des donnees recue filtrees pour ana
-ANA_FILTRAGE_BIBLIO = False   # utilisation donnees biblio filtrees pour ana
 ANA_SCENARIO = 8   # nombre de scenario de calcul d ecart traites
-
 # predicteur parametre : parametres de reglage
 PARA_PROFONDEUR = 3   # nombre de points de comparaison
-PARA_HORIZON_POINT = 20   # horizon de recherche des points (< a TAILLE_BUFFER)
-
-# traitement et prediction : parametres de reglage
-HORIZON = 6    # horizon de prediction (nombre d heures predites)
+PARA_HORIZON_POINT = 20   # horizon de recherche des points (< a T_BUFFER)
+# predicteur algo : parametres de reglage
+NB_ALGO = 20   # nombre d algorithmes d'optimisation
 V_PRED_MOYEN = 1  # moyenne histo des rangs des prédicteurs (0 :h, 1 :h et h-1)
 V_PENAL = 1.0   # vitesse evolution de la penalisation des mauvais predicteurs
 V_MEMOIRE = 1.0    # vitesse d evolution - methode par ordre
@@ -153,24 +143,32 @@ V_PREDIC = 0.05    # vitesse d evolution de la prediction : etait (0,08)
 V_PREDIC2 = 0.04    # vitesse d evolution de la prediction : etait (0,04)
 V_PREDIC3 = 0.01    # vitesse d evolution de la prediction : etait (0,02)
 V_MOYENNE = 0.3    # vitesse d evolution de la moyenne : etait 0.1
-ACTIVATION_REF = True    # activation predicteur de reference
-ACTIVATION_ANA = True    # activation predicteur analogie
-ACTIVATION_PARAM = True    # activation predicteur parametre
-ACTIVATION_VENT = True    # activation predicteur vent
-ACTIVATION_MAUVAIS = False  # penalisation preds mauvais / algos optimisation
-PRED_RESULTAT = 5   # nombre de meilleurs candidats ana et param conserves
-NB_ALGO = 20   # nombre d algorithmes d'optimisation
-OPTI_ALGO = 1   # vitesse algo(1 : v=1/ecart, 2 : param mémoire, 3 : V_PREDIC)
+OPTI_ALGO = 2   # vitesse algo(1 : v=1/ecart, 2 : param mémoire, 3 : V_PREDIC)
+NB_PRED_REDUIT = 15  # nombre de predicteurs conserves dans les algos
+NB_ALGO_REDUIT = 18  # nombre de predicteurs de synthese pour l'estim finale
+MAX_VARIATION = 1  # coef pour les variations maxi entre 2 valeurs successives
+MAX_VALEUR = 3  # coefficient pour les valeurs maxi
 
 # constantes déduite
-NB_PREDICTEURS = REF_SCENARIO + ANA_SCENARIO + 2 * PRED_RESULTAT  # nb des pred
-NB_ECART_PRED = NB_PREDICTEURS + NB_ALGO + 2  # unitaire+synthèse+meill+filtre
+
+NB_PREDICTEURS = REF_SCENARIO + ANA_SCENARIO + PRED_RESULTAT + VENT_SCENARIO +\
+                 MODELE_SCENARIO  # nb des predicteurs
+NB_ECART_PRED = NB_PREDICTEURS + NB_ALGO + 2  # nb total pred
 I_REF = 0
 I_ANA = I_REF + REF_SCENARIO
 I_PARAM = I_ANA + ANA_SCENARIO
 I_VENT = I_PARAM + PRED_RESULTAT
-I_ALGO = I_VENT + VENT_SCENARIO
+I_MODELE = I_VENT + VENT_SCENARIO
+I_ALGO = I_MODELE + MODELE_SCENARIO
 I_MEILLEUR = I_ALGO + NB_ALGO
+DEBUG_PREDICTION = DEBUG_PREDICTION1 or DEBUG_PREDICTION2 or \
+    DEBUG_PREDICTION3 or DEBUG_PREDICTION4 or DEBUG_PREDICTION5 or \
+    DEBUG_PREDICTION6
+N_COLONNE = NB_PREDICTEURS * NB_ALGO + 3 * NB_ALGO + 2 * MODELE_SCENARIO + \
+    2 * VENT_SCENARIO + 2 * PRED_RESULTAT + 3 * ANA_SCENARIO + \
+    2 * REF_SCENARIO + 13
+
+# initialisation des valeurs des coefficients d ajustement
 
 # initialisation des coefficients d ajustement des predicteurs
 C_MEM_PREDICTION = zeros((NB_PREDICTEURS))
@@ -195,7 +193,6 @@ C_MEM_PREDICTION[17] = 0.01
 C_MEM_PREDICTION[18] = 0.0
 C_MEM_PREDICTION[19] = 0.0
 C_MEM_PREDICTION[20] = 0.0
-
 # initialisation des coef memoire analogie
 C_MEM_ANA = zeros((ANA_PROFONDEUR, ANA_SCENARIO))
 C_MEM_ANA[0, 0] = 0.05
@@ -269,13 +266,11 @@ C_MEM_ANA[4, 7] = 0.15
 C_MEM_ANA[5, 7] = 0.25
 C_MEM_ANA[6, 7] = 0.25
 C_MEM_ANA[7, 7] = 0.15
-
 # initialisation des coef memoire parametre
 C_MEM_PARAM = zeros((PARA_PROFONDEUR))
 C_MEM_PARAM[0] = 0.3
 C_MEM_PARAM[1] = 0.5
 C_MEM_PARAM[2] = 0.2
-
 # initialisation des parametres des algorithmes
 C_ALGO_PARAM = -ones((NB_ALGO, NB_V_ALGO))
 for i in range(NB_ALGO):
