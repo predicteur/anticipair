@@ -7,14 +7,14 @@ Created on Fri Jul 29 20:03:47 2016
 essai d appel de la prediction
 """
 
+import os
 from numpy import zeros, loadtxt
-import predicteur as pred
-from constante import ANNEE_POINT, HEURE_POINT, HORIZON, V_MODELE, V_VENT, \
-    JOUR_POINT, MOIS_POINT, NON_FILTRE, VAL_ANNEE, VAL_HEURE, VAL_JOUR, \
-    VAL_MOIS, VAL_VALEUR, N_ATTRIBUT
-from constante_instal import N2AIXA, N2AIXC, N2CINQ, N2PLOM, O3AIXA, O3AIXP, \
-    O3CINQ, PCAIXA, PCAIXC, PCCINQ, PCRABA, PCSTLO, N2RABA, N2STLO, AIXVV, \
-    PCCINQ_MORGAN, VV1_MORGAN, VV2_MORGAN
+
+from anticipair import predicteur as pred
+from anticipair.constante import ANNEE_POINT, HEURE_POINT, HORIZON, V_MODELE, \
+    V_VENT, JOUR_POINT, MOIS_POINT, NON_FILTRE, VAL_ANNEE, VAL_HEURE, \
+    VAL_JOUR, VAL_MOIS, VAL_VALEUR, N_ATTRIBUT
+from anticipair.constante_instal import PCCINQ_MORGAN, VV2_MORGAN
 
 
 def Lecture_Nouvelle_Valeur(instant, donnees):
@@ -60,7 +60,7 @@ def Valeurs_Morgan():
     valeur du vent : colonne 5 ou 6
     valeur du mod_air : colonne 7
     """
-    fichier_mesure = """./mesures_Morgan.csv"""
+    fichier_mesure = os.path.join('data', 'mesures_Morgan.csv')
     mesure_brut = loadtxt(fichier_mesure, delimiter=';', skiprows=1)
     serie_vent = 6
     N_LIGNE_MESURE = 3672

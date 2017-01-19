@@ -1,0 +1,24 @@
+b_prediction_meilleur		b_pred_meilleur
+memoire_prediction		memoire_pred
+b_prediction_analogie		b_pred_analogie
+b_prediction_parametre		b_pred_parametre
+b_prediction_reference		b_pred_reference
+
+ecart_predicteur
+coef_predicteur
+coef_algo
+algo_param
+b_pred_vent
+resultat_analogie
+resultat_parametre
+min_max_seq
+
+mat_affic
+mat_entete
+
+mesure_ecart_xxxx à supprimer
+
+
+init b_pred_tableau ????
+donnees[V_VENT, i] = biblio[i - 1, 12] # fichier à initialiser
+ point_test = zeros((3), dtype=int)
