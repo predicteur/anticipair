@@ -1,5 +1,5 @@
 ### Anticipair
-serie*
+serie[0-9]*
 debug_prediction*.csv
 
 
