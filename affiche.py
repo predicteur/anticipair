@@ -249,7 +249,7 @@ def Affiche_Prediction(indice, mat_affic, mat_entete, b_pred_mod, b_pred_vent,
             mat_affic[k, indice+4+k, p_pred+2*i] = b_pred_ref[0, i, k]
             mat_affic[k, indice+4+k, p_pred+2*i+1] = ecart_pred[i+I_REF, k]
         for i in range(ANA_SCENARIO):
-            j = round(mem_moy_ana[i], 0)
+            j = int(round(mem_moy_ana[i], 0))
             mat_affic[k, indice+4+k, p_pred_ana+2*i] = b_pred_ana[0, i, j, k]
             mat_affic[k, indice+4+k, p_pred_ana+2*i+1] = ecart_pred[i+I_ANA, k]
         for i in range(PRED_RESULTAT):
