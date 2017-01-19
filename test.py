@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.5
 # coding: utf-8
 
-"""Utilisation d'anticipair pour prévoir les prochaines heures."""
+"""Test Anticipair."""
 
 
 import unittest
