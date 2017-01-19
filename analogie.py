@@ -63,7 +63,7 @@ def Predicteur_Analogie(res_ana, b_pred_ana,
         Traite_Candidat_Analogie(j, b_pred_ana, res_ana, donnees,
                                  vitesse_vent, desactiv_vent)
         for k in range(HORIZON):
-            i = round(mem_moy_ana[j], 0)
+            i = int(round(mem_moy_ana[j], 0))
             b_pred_reduit[0, j, k] = b_pred_ana[0, j, i, k]
 
     # limitation des valeurs predites
@@ -152,7 +152,7 @@ def Traite_Candidat_Analogie(n_sce, b_pred_ana, res_ana, donnees,
         # documentation des ecarts vv
         for i in range(2 * PRED_RESULTAT):
             res_ana[ANA_V_VENT, i] = \
-                abs(donnees[V_VENT, res_ana[ANA_HEURE, i]+k+1] -
+                abs(donnees[V_VENT, int(res_ana[ANA_HEURE, i])+k+1] -
                     vitesse_vent[k+1])
 
         # tri des candidats (meilleur avec 0, moins bon 2*PRED_RESULTAT-1)
@@ -177,9 +177,9 @@ def Traite_Candidat_Analogie(n_sce, b_pred_ana, res_ana, donnees,
 
         # valeurs predites avec horizon de pred pour chaque type de resultat
         b_pred_ana[0, n_sce, 0, k] = donnees[BUF_SERIE,
-                                             res_ana[ANA_HEURE, 0]+1+k]
+                                             int(res_ana[ANA_HEURE, 0])+1+k]
         for j in range(1, PRED_RESULTAT):
             b_pred_ana[0, n_sce, j, k] = b_pred_ana[0, n_sce, j-1, k] + \
-                donnees[BUF_SERIE, res_ana[ANA_HEURE, j]+1+k]
+                donnees[BUF_SERIE, int(res_ana[ANA_HEURE, j])+1+k]
         for j in range(PRED_RESULTAT):
             b_pred_ana[0, n_sce, j, k] /= (j+1)

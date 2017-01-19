@@ -107,9 +107,9 @@ def Traite_Candidat_Parametre(b_pred_param, donnees, buffer, res_param,
 
     # documentation des ecarts vv à partir de la vv au prochain point carac
     for i in range(2 * PRED_RESULTAT):
-        res_param[PARA_V_VENT, i] = abs(donnees[V_VENT,
-                                        res_param[PARA_HEURE, i]+HORIZON-1] -
-                                        vitesse_vent[HORIZON - 1])
+        res_param[PARA_V_VENT, i] = abs(
+            donnees[V_VENT, int(res_param[PARA_HEURE, i])+HORIZON-1] -
+            vitesse_vent[HORIZON - 1])
 
     # tri des candidats (meilleur avec 0, moins bon 2*PRED_RESULTAT-1)
     if VENT_PARANA and not desactiv_vent:
@@ -192,12 +192,12 @@ def Recherche_pt_carac(n_cherche, sens, pt_carac, donnee_a_traiter):
     pt_carac[0] = n_cherche
     pt_a_trouver = 1
     for i in range(PARA_HORIZON_POINT+1):
-        if donnee_a_traiter[TYPE_POINT, n_cherche + sens * (1 + i)] != 0:
+        if donnee_a_traiter[TYPE_POINT, int(n_cherche + sens * (1 + i))] != 0:
             pt_carac[pt_a_trouver] = n_cherche + sens * (1 + i)
             if sens == 1:
-                pt_a_trouver = pt_a_trouver + 1
+                pt_a_trouver += 1
             elif abs(pt_carac[pt_a_trouver] - pt_carac[pt_a_trouver - 1]) > 2:
-                pt_a_trouver = pt_a_trouver + 1
+                pt_a_trouver += 1
         if pt_a_trouver == 3:
             break
 
