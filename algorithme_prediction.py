@@ -228,7 +228,7 @@ def Apprentissage_Prediction(ecart_pred, coef_pred, b_pred_tab, mem_pred,
         # pointage invese du tableau (rangpred(n°pred) = rang)
         for h in range(V_PRED_MOYEN + 1):
             for i in range(NB_PREDICTEURS):
-                rang_pred[h, b_pred_tab[h, PRED_RANG, i, k]] = i
+                rang_pred[h, int(b_pred_tab[h, PRED_RANG, i, k])] = i
 
         # lissage des rangs
         for i in range(NB_PREDICTEURS):
@@ -248,8 +248,8 @@ def Apprentissage_Prediction(ecart_pred, coef_pred, b_pred_tab, mem_pred,
                                                   rang[i], k], 0.01)
                     total += vitesse[k, rang[i]]
                 for i in range(NB_PRED_REDUIT):
-                    coef_pred[k, b_pred_tab[0, PRED_RANG, rang[i], k], j] += \
-                        algo_param[j, N_ECART] * vitesse[k, rang[i]] / total
+                    coef_pred[k, int(b_pred_tab[0, PRED_RANG, rang[i], k]), j] \
+                        += algo_param[j, N_ECART] * vitesse[k, rang[i]] / total
             elif algo_param[j, N_MEMOIRE] > 0:
                 for i in range(NB_PRED_REDUIT):
                     coef_pred[k, rang[i], j] = algo_param[j, N_MEMOIRE] * \
