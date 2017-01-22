@@ -6,7 +6,7 @@ Methodes de la classe predicteur
 """
 
 from datetime import datetime
-from numpy import ones, zeros, load, save, arange
+from numpy import ones, zeros, load, save, arange, loadtxt
 
 from algorithme_prediction import AcquisitionBuffer, Mesure_Ecart_Predicteur, \
     Apprentissage_Prediction, Meilleure_Prediction, Analyse, \
@@ -22,7 +22,7 @@ from bibliotheque import Init_Bibliotheque
 from vent import Predicteur_Correlation_Vent
 from modele import Predicteur_Correlation_Modele
 
-from constante_instal import N_LIGNE, FILE_DEBUG
+from constante_instal import FILE_BIBLIO, FILE_DEBUG
 
 from constante import ANNEE_POINT, FILTRE, HEURE_POINT, HORIZON, \
     JOUR_POINT, MOIS_POINT, NON_FILTRE, PRED_RESULTAT, T_BUFFER, \
@@ -96,7 +96,8 @@ class predicteur:
         self.b_pred_ref = zeros((T_BUFFER+1, REF_SCENARIO, HORIZON))
 
         # donnees generales bibliotheque
-        self.donnees = zeros((N_ATTRIBUT+1, N_LIGNE+1))
+        bibli = loadtxt(FILE_BIBLIO, dtype='str', delimiter=',', skiprows=1)
+        self.donnees = zeros((N_ATTRIBUT+1, bibli.size+1))
         self.min_max_seq = zeros((NB_SEQ+1, 2))
         self.seuil = Init_Bibliotheque(serie_a_traiter, serie_vent,
                                        self.donnees, self.min_max_seq)
