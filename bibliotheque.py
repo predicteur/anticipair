@@ -6,7 +6,7 @@ Methode de chargement de la bibliotheque historique
 """
 
 from numpy import loadtxt, percentile
-from constante_instal import FILE_BIBLIO, N_LIGNE
+from constante_instal import FILE_BIBLIO
 from constante import ANNEE_POINT, DEB_MATIN, DEB_MIDI, DEB_SOIR, \
     FILTRE, HEURE_POINT, INTER_POINT, JOUR_POINT, MATIN, MAXI, MAX_SEQ, MIDI,\
     MIN_SEQ, MOIS_POINT, NB_SEQ, NON_FILTRE, NUIT, PARA_SENS, \
@@ -20,9 +20,9 @@ def Init_Bibliotheque(serie_a_traiter, serie_vent, data, min_max):
         annee, mois, jour, heure : colonnes 0 à 3
         mesure : colonne n° serie_a_traiter
         vent : colonne n° serie_vent
-    Nombre de ligne traitees : N_LIGNE
     """
     biblio = loadtxt(FILE_BIBLIO, delimiter=';', skiprows=1)
+    n_lig = data[0, :].size - 1
 
     data[NON_FILTRE, 0] = 0.0
     data[FILTRE, 0] = 0.0
@@ -36,14 +36,14 @@ def Init_Bibliotheque(serie_a_traiter, serie_vent, data, min_max):
     data[ECART, 0] = 0.0
     data[ECRETE, 0] = 0.0
 
-    data[NON_FILTRE, N_LIGNE] = 0
-    data[FILTRE, N_LIGNE] = 0
+    data[NON_FILTRE, n_lig] = 0
+    data[FILTRE, n_lig] = 0
 
     for i in range(1, NB_SEQ+1):
         min_max[i, MIN_SEQ] = MAXI
         min_max[i, MAX_SEQ] = 0.0
 
-    for i in range(1, N_LIGNE):
+    for i in range(1, n_lig):
         data[HEURE_POINT, i] = biblio[i - 1, 3]
         data[JOUR_POINT, i] = biblio[i - 1, 2]
         data[MOIS_POINT, i] = biblio[i - 1, 1]
@@ -124,7 +124,7 @@ def Init_Bibliotheque(serie_a_traiter, serie_vent, data, min_max):
                 mx_seq4 = i
     seuil = percentile(data[ECART, :], SEUIL_ECRETAGE)
 
-    for i in range(1, N_LIGNE):
+    for i in range(1, n_lig):
         if data[NON_FILTRE, i] - data[ECRETE, i-1] > seuil:
             data[ECRETE, i] = data[ECRETE, i-1] + seuil
         else:
