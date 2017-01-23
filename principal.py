@@ -14,7 +14,7 @@ from anticipair import predicteur as pred
 from anticipair.constante import ANNEE_POINT, HEURE_POINT, HORIZON, V_MODELE, \
     V_VENT, JOUR_POINT, MOIS_POINT, NON_FILTRE, VAL_ANNEE, VAL_HEURE, \
     VAL_JOUR, VAL_MOIS, VAL_VALEUR, N_ATTRIBUT
-from anticipair.constante_instal import PCCINQ_MORGAN, VV2_MORGAN
+from anticipair.constante_instal import PCCINQ_MORGAN, VV2_MORGAN, N2CINQ
 
 
 def Lecture_Nouvelle_Valeur(instant, donnees):

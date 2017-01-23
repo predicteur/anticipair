@@ -8,7 +8,7 @@ Methodes de la classe predicteur
 import os
 from datetime import datetime
 
-from numpy import ones, zeros, load, save, arange
+from numpy import ones, zeros, load, save, arange, loadtxt
 
 from anticipair.affiche import Affiche_Buffer, Affiche_Donnees_Traitees, \
     Affiche_Analogie, Affiche_Parametre, Affiche_Reference, \
@@ -29,7 +29,7 @@ from anticipair.constante import ANNEE_POINT, FILTRE, HEURE_POINT, HORIZON, \
     DEBUG_PREDICTION4, DEBUG_PREDICTION5, DEBUG_PREDICTION6, DEBUG_MODELE, \
     DEBUG_PREDICTION1, DEBUG_PREDICTION, I_REF, I_ANA, I_PARAM, I_VENT, \
     I_MODELE, I_ALGO, MAXI, V_VENT
-from anticipair.constante_instal import FILE_DEBUG
+from anticipair.constante_instal import FILE_DEBUG, FILE_BIBLIO
 from anticipair.modele import Predicteur_Correlation_Modele
 from anticipair.parametre import Predicteur_Parametre
 from anticipair.reference import Predicteur_Reference
