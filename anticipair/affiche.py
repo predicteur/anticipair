@@ -19,7 +19,7 @@ from anticipair.constante import ANA_SCENARIO, FILTRE, HEURE_POINT, \
     ACTIVATION_MAUVAIS, OPTI_ALGO, I_MODELE, MODELE_SCENARIO, \
     ACTIVATION_MODELE, NB_PRED_REDUIT, NB_ALGO_REDUIT, MAX_VARIATION, \
     MAX_VALEUR, ECRETE
-from anticipair.constante_instal import N_LIGNE, FILE_BIBLIO
+from anticipair.constante_instal import FILE_BIBLIO
 
 
 def Affiche_Donnees_Traitees(donnees):
@@ -28,13 +28,14 @@ def Affiche_Donnees_Traitees(donnees):
     """
     print("heure", "non-filtre", "sequence", "type_point", "filtre")
     # for i in range(1, 10):
+    n_lig = donnees[0, :].size - 1
     for i in range(6184, 6204):
         print(donnees[HEURE_POINT, i], donnees[NON_FILTRE, i],
               donnees[SEQUENCE, i], donnees[TYPE_POINT, i],
               donnees[FILTRE, i])
-    print(donnees[HEURE_POINT, N_LIGNE - 1], donnees[NON_FILTRE, N_LIGNE - 1],
-          donnees[SEQUENCE, N_LIGNE - 1], donnees[TYPE_POINT, N_LIGNE - 1],
-          donnees[FILTRE, N_LIGNE - 1])
+    print(donnees[HEURE_POINT, n_lig - 1], donnees[NON_FILTRE, n_lig - 1],
+          donnees[SEQUENCE, n_lig - 1], donnees[TYPE_POINT, n_lig - 1],
+          donnees[FILTRE, n_lig - 1])
 
 
 def Affiche_Buffer(buffer):

@@ -97,7 +97,7 @@ def Essai_Predicteur1():
         print("valeur : ", nouv_valeur[0], " prévu : ", resultat[0],
               " écart : ", (nouv_valeur[0] - resultat[0]))
         resultat = pred1.Prediction(nouv_valeur)
-        resultat = pred1.Prediction(nouv_valeur, vitesse_vent=v_vent)
+        # resultat = pred1.Prediction(nouv_valeur, vitesse_vent=v_vent)
         # resultat =  pred1.Prediction(nouv_valeur, modele=mod_air)
         # resultat = pred1.Prediction(nouv_valeur, v_vent, mod_air)
         # print("resultat", resultat)
@@ -107,27 +107,28 @@ def Essai_Predicteur1():
 
 def Essai_Predicteur2():
     """ essai sans reinitialisation de la classe """
-    N_RESULT = 3600    # nombre de donnees traitees (9000), 90, 900, 3600
-    N_DEPART = 26    # premiere ligne des donnees traitees, 26
+    N_RESULT = 89    # nombre de donnees traitees (9000), 90, 900, 3600
+    N_DEPART = 1    # premiere ligne des donnees traitees, 26
     reset_prediction = True
     resultat = zeros((HORIZON))
     resultat_filtre = zeros((HORIZON))
-    # serie_traitee = N2AIXA
+    serie_traitee = N2CINQ
     # serie_vent = AIXVV
-    serie_traitee = PCCINQ_MORGAN
-    serie_vent = VV2_MORGAN
-    # pred1 = pred.predicteur(serie_traitee, reset_prediction)
-    pred1 = pred.predicteur(serie_traitee, reset_prediction, serie_vent)
+    # serie_traitee = PCCINQ_MORGAN
+    # serie_vent = VV2_MORGAN
+    pred1 = pred.predicteur(serie_traitee, reset_prediction)
+    # pred1 = pred.predicteur(serie_traitee, reset_prediction, serie_vent)
     # mesure = pred1.donnees
     mesure = Valeurs_Morgan()
     for instant in range(N_DEPART, N_RESULT + 1):
         nouv_valeur = Lecture_Nouvelle_Valeur(instant-1, mesure)
         v_vent = Lecture_Nouvelle_Valeur_Vent(instant-1, mesure)
         mod_air = Lecture_Nouvelle_Valeur_Modele(instant-1, mesure)
-        # resultat = pred1.Prediction(nouv_valeur)
+        resultat = pred1.Prediction(nouv_valeur)
         # resultat = pred1.Prediction(nouv_valeur, vitesse_vent=v_vent)
         # resultat = pred1.Prediction(nouv_valeur, modele=mod_air)
-        resultat = pred1.Prediction(nouv_valeur, v_vent, mod_air)
+        # resultat = pred1.Prediction(nouv_valeur, v_vent, mod_air)
+        print("valeur : ", nouv_valeur[0], pred1.Info_Date(), " prévu : ", resultat)
         date_mesure = pred1.Info_Date()
         tendance = pred1.Tendance()
         ecart_moyen = pred1.Ecart_Moyen(1)
@@ -137,8 +138,8 @@ def Essai_Predicteur2():
         # print("resultat1", resultat)
         if instant % 100 == 0:
             print("instant : ", instant)
-        if instant == N_RESULT:
-            pred1.Debug_Pred()
+        # if instant == N_RESULT:
+        #     pred1.Debug_Pred()
     del pred1
 
 Essai_Predicteur2()

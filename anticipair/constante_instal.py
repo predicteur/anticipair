@@ -25,14 +25,12 @@ import os
 
 # si fichier Morgan
 # FILE_BIBLIO = os.path.join("data", "apprentissage_Morgan.csv")
-# N_LIGNE = 13866    # nombre de lignes du fichiers (donnees bibliotheque)
 PCCINQ_MORGAN = 4  # colonne de la serie
 VV1_MORGAN = 5  # colonne de la serie
 VV2_MORGAN = 6  # colonne de la serie
 
 # si fichier general
 FILE_BIBLIO = os.path.join("data", "Biblio_2014-2015_export.csv")
-N_LIGNE = 17520    # nombre de lignes du fichiers (donnees bibliotheque)
 N2AIXA = 4  # colonne de la serie
 N2AIXC = 5  # colonne de la serie
 N2CINQ = 6  # colonne de la serie

@@ -16,7 +16,6 @@ from anticipair.constante import ANA_ECART_MC, ANA_HEURE, ANA_PROFONDEUR, ANA_SC
     ANNEE_POINT, HEURE_POINT, HORIZON, JOUR_POINT, MAXI, MOIS_POINT, \
     PRED_RESULTAT, T_BUFFER, V_MOYENNE, ANA_V_VENT, V_VENT, VENT_PARANA, \
     BUF_SERIE, BIB_SERIE, NON_FILTRE
-from anticipair.constante_instal import N_LIGNE
 from anticipair.reference import min_max
 
 
@@ -107,7 +106,7 @@ def Cherche_Candidat_Analogie(n_sce, res_ana, mem_ana,
         if donnees[HEURE_POINT, i] == buffer[HEURE_POINT, T_BUFFER]:
             n_dep = i + 24
             break
-    n_total = int((N_LIGNE - n_dep) / 24)
+    n_total = int((donnees[0, :].size - 1 - n_dep) / 24)
     for h in range(n_total-1):
         n_test = n_dep + h * 24
 

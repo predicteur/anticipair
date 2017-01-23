@@ -29,7 +29,7 @@ from anticipair.constante import ANNEE_POINT, FILTRE, HEURE_POINT, HORIZON, \
     DEBUG_PREDICTION4, DEBUG_PREDICTION5, DEBUG_PREDICTION6, DEBUG_MODELE, \
     DEBUG_PREDICTION1, DEBUG_PREDICTION, I_REF, I_ANA, I_PARAM, I_VENT, \
     I_MODELE, I_ALGO, MAXI, V_VENT
-from anticipair.constante_instal import N_LIGNE, FILE_DEBUG
+from anticipair.constante_instal import FILE_DEBUG
 from anticipair.modele import Predicteur_Correlation_Modele
 from anticipair.parametre import Predicteur_Parametre
 from anticipair.reference import Predicteur_Reference
@@ -96,7 +96,8 @@ class predicteur:
         self.b_pred_ref = zeros((T_BUFFER+1, REF_SCENARIO, HORIZON))
 
         # donnees generales bibliotheque
-        self.donnees = zeros((N_ATTRIBUT+1, N_LIGNE+1))
+        bibli = loadtxt(FILE_BIBLIO, dtype='str', delimiter=',', skiprows=1)
+        self.donnees = zeros((N_ATTRIBUT+1, bibli.size+1))
         self.min_max_seq = zeros((NB_SEQ+1, 2))
         self.seuil = Init_Bibliotheque(serie_a_traiter, serie_vent,
                                        self.donnees, self.min_max_seq)
