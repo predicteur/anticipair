@@ -7,7 +7,7 @@ Created on Sat Aug  6 13:19:04 2016
 Affichage des valeurs intermédiaires pour debug (console et/ou fichier)
 """
 
-from constante_instal import N_LIGNE, FILE_BIBLIO
+from constante_instal import FILE_BIBLIO
 
 from constante import ANA_SCENARIO, FILTRE, HEURE_POINT, \
     HORIZON, NB_PREDICTEURS, NON_FILTRE, PRED_RESULTAT, SEQUENCE, \
@@ -29,13 +29,14 @@ def Affiche_Donnees_Traitees(donnees):
     """
     print("heure", "non-filtre", "sequence", "type_point", "filtre")
     # for i in range(1, 10):
+    n_lig = donnees[0, :].size - 1
     for i in range(6184, 6204):
         print(donnees[HEURE_POINT, i], donnees[NON_FILTRE, i],
               donnees[SEQUENCE, i], donnees[TYPE_POINT, i],
               donnees[FILTRE, i])
-    print(donnees[HEURE_POINT, N_LIGNE - 1], donnees[NON_FILTRE, N_LIGNE - 1],
-          donnees[SEQUENCE, N_LIGNE - 1], donnees[TYPE_POINT, N_LIGNE - 1],
-          donnees[FILTRE, N_LIGNE - 1])
+    print(donnees[HEURE_POINT, n_lig - 1], donnees[NON_FILTRE, n_lig - 1],
+          donnees[SEQUENCE, n_lig - 1], donnees[TYPE_POINT, n_lig - 1],
+          donnees[FILTRE, n_lig - 1])
 
 
 def Affiche_Buffer(buffer):

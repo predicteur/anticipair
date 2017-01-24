@@ -248,7 +248,7 @@ def Apprentissage_Prediction(ecart_pred, coef_pred, b_pred_tab, mem_pred,
                                                   rang[i], k], 0.01)
                     total += vitesse[k, rang[i]]
                 for i in range(NB_PRED_REDUIT):
-                    coef_pred[k, int(b_pred_tab[0, PRED_RANG, rang[i], k]), j] \
+                    coef_pred[k, int(b_pred_tab[0, PRED_RANG, rang[i], k]), j]\
                         += algo_param[j, N_ECART] * vitesse[k, rang[i]] / total
             elif algo_param[j, N_MEMOIRE] > 0:
                 for i in range(NB_PRED_REDUIT):
