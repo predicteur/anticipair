@@ -60,7 +60,8 @@ def Valeurs_Morgan():
     valeur du vent : colonne 5 ou 6
     valeur du mod_air : colonne 7
     """
-    fichier_mesure = """./mesures_Morgan2.csv"""
+    # fichier_mesure = """./mesures_Morgan2.csv"""
+    fichier_mesure = """./mesures_Morgan.csv"""
     mesure_brut = loadtxt(fichier_mesure, delimiter=';', skiprows=1)
     serie_vent = 6
     N_LIGNE_MESURE = 3672
@@ -107,14 +108,14 @@ def Essai_Predicteur1():
 
 def Essai_Predicteur2():
     """ essai sans reinitialisation de la classe """
-    N_RESULT = 89    # nombre de donnees traitees (9000), 90, 900, 3600
+    N_RESULT = 50    # nombre de donnees traitees (9000), 90, 900, 3600
     N_DEPART = 1    # premiere ligne des donnees traitees, 26
     reset_prediction = True
     resultat = zeros((HORIZON))
     resultat_filtre = zeros((HORIZON))
-    serie_traitee = N2CINQ
+    # serie_traitee = N2CINQ
     # serie_vent = AIXVV
-    # serie_traitee = PCCINQ_MORGAN
+    serie_traitee = PCCINQ_MORGAN
     # serie_vent = VV2_MORGAN
     pred1 = pred.predicteur(serie_traitee, reset_prediction)
     # pred1 = pred.predicteur(serie_traitee, reset_prediction, serie_vent)
@@ -131,11 +132,10 @@ def Essai_Predicteur2():
         print("valeur : ", nouv_valeur[0], pred1.Info_Date(), " prévu : ", resultat)
         date_mesure = pred1.Info_Date()
         tendance = pred1.Tendance()
-        ecart_moyen = pred1.Ecart_Moyen(1)
-        ecart_moyen_f = pred1.Ecart_Moyen_Filtre(1)
+        indicateur = pred1.Indicateur(23)
         ecart_tendance = pred1.Ecart_Tendance()
         # resultat_filtre = pred1.Prediction_Filtre(nouv_valeur, v_vent)
-        # print("resultat1", resultat)
+        print("indicateur", indicateur)
         if instant % 100 == 0:
             print("instant : ", instant)
         # if instant == N_RESULT:

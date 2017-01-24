@@ -6,6 +6,7 @@ Methodes de la classe predicteur
 """
 
 from datetime import datetime
+from math import sqrt
 from numpy import ones, zeros, load, save, arange, loadtxt
 
 from algorithme_prediction import AcquisitionBuffer, Mesure_Ecart_Predicteur, \
@@ -250,8 +251,7 @@ class predicteur:
             Affiche_Prediction_Complement(self.instant, self.mat_affic,
                                           self.Tendance(),
                                           self.Ecart_Tendance(),
-                                          self.Ecart_Moyen(),
-                                          self.Ecart_Moyen_Filtre())
+                                          self.Indicateur(24))
         # stockage des parametres
         nom_fichier = "serie" + str(self.serie)
         fichier = open(nom_fichier, "wb")
@@ -390,60 +390,52 @@ class predicteur:
     def Indicateur(self, histo=T_BUFFER, traitement=NON_FILTRE, horizon=1):
         """
         Indicateurs des dernières predictions sur un historique donné
-        (T_BUFFER par défaut) et pour un horizon donne (1 par defaut).
+        (T_BUFFER-1 par défaut) et pour un horizon donne (1 par defaut).
         Renvoie -1 si des valeurs relatives sont nulles
         Entree :
             Histo : historique de calcul (T_BUFFER par défaut)
             Horizon : horizon de prediction choisi (1 par defaut)
             traitement : donnee d'entree -> 0-valeur mesuree, 1-valeur filtree,
             11-valeur ecretee(0 par defaut)
-        Sortie :
-            indic : array avec
+        Sortie : indic : array avec
                 [0] pour MAE(Mean Absolute Error): Erreur absolue moyenne
                 [1] pour PCC(Pearson Correlation Coefficient) : 1 OK, 0 KO
                 [2] pour ME(Mean Error) : biais
                 [3] pour EV(Error Variance) : Variance
                 [4] pour MSE(Mean Square Error) : Erreur quadratique
-                [5] pour MSPE(Mean Square Percentage Error)
-                [6] pour MAPE(Mean Absolute Percentage Error)
-                [7] pour RMSE(Root Mean Square Error) : Erreur type
+                [5] pour RMSE(Root Mean Square Error) : Erreur type
+                [6] pour MSPE(Mean Square Percentage Error)
+                [7] pour MAPE(Mean Absolute Percentage Error)
                 [8] pour RMSPE(Root Mean Square Percentrage Error)
         """
-        ecart_moyen = zeros((2))
-        ecart_moyen[1] = -1.0
-        valeurs = 0.0
-        for i in range(5):
-            ecart_moyen[0] += abs(self.buffer[NON_FILTRE, T_BUFFER-i] -
-                                  self.b_pred_meil[horizon+i, horizon-1])
-            valeurs += self.buffer[NON_FILTRE, T_BUFFER - i]
-        if valeurs > 0.1:
-            ecart_moyen[1] = ecart_moyen[0] / valeurs
-        ecart_moyen[0] /= 5.0
-
-        return ecart_moyen
-
-    def Ecart_Moyen_Filtre(self, horizon=1):
-        """
-        Moyenne des ecarts absolus et relatif des 5 dernières predictions
-        filtrees pour un horizon donne (1 par defaut).
-        Renvoie -1 si les 5 dernieres valeurs sont nulles
-        Entree :
-            Horizon : horizon de prediction choisi (1 par defaut)
-        Sortie :
-            ecart_moyen : array avec [0] pour ecart absolu et [1] pour relatif
-        """
-        ecart_moyen_f = zeros((2))
-        ecart_moyen_f[1] = -1.0
-        valeurs = 0.0
-        for i in range(5):
-            ecart_moyen_f[0] += abs(self.buffer[FILTRE, T_BUFFER - i] -
-                                    self.b_pred_filt[horizon + i, horizon - 1])
-            valeurs += self.buffer[FILTRE, T_BUFFER-i]
-        if valeurs > 0.1:
-            ecart_moyen_f[1] = ecart_moyen_f[0] / valeurs
-        ecart_moyen_f[0] /= 5.0
-
-        return ecart_moyen_f
+        indic = zeros((9))
+        relatif_ko = False
+        for i in range(histo):
+            indic[0] += abs(self.buffer[traitement, T_BUFFER-i] -
+                            self.b_pred_meil[horizon+i, horizon-1])
+            indic[2] += (self.buffer[traitement, T_BUFFER-i] -
+                         self.b_pred_meil[horizon+i, horizon-1])
+            indic[4] += (self.buffer[traitement, T_BUFFER-i] -
+                         self.b_pred_meil[horizon+i, horizon-1]) ** 2
+            if self.buffer[traitement, T_BUFFER - i] > 0.1:
+                indic[6] = indic[0] / self.buffer[traitement, T_BUFFER - i]
+                indic[5] = indic[4] / self.buffer[traitement, T_BUFFER - i]
+            else:
+                relatif_ko = True
+        indic[0] /= histo
+        indic[2] /= histo
+        indic[4] /= histo
+        indic[5] = sqrt(indic[4])
+        indic[3] = indic[4] - indic[2] ** 2
+        if relatif_ko:
+            indic[6] = -1.0
+            indic[7] = -1.0
+            indic[8] = -1.0
+        else:
+            indic[6] /= (histo + 1)
+            indic[7] /= (histo + 1)
+            indic[8] = sqrt(indic[5])
+        return indic
 
     def Ecart_Tendance(self):
         """

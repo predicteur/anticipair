@@ -169,7 +169,7 @@ def Affiche_Constante(serie):
 
 
 def Affiche_Prediction_Complement(indice, mat_affic, tendance, ecart_tendance,
-                                  ecart_moyen, ecart_moyen_f):
+                                  indicateur):
     """
     complement affichage des predicteurs pour AFFICHE_HORIZON (0 si H+1)
     """
@@ -177,8 +177,8 @@ def Affiche_Prediction_Complement(indice, mat_affic, tendance, ecart_tendance,
     k = AFFICHE_HORIZON
     mat_affic[k, indice + 4 + k, p_pred_meil + 2] = tendance
     mat_affic[k, indice + 4 + k, p_pred_meil + 4] = ecart_tendance
-    mat_affic[k, indice + 4 + k, p_pred_meil + 5] = ecart_moyen[0]
-    mat_affic[k, indice + 4 + k, p_pred_meil + 6] = ecart_moyen_f[0]
+    mat_affic[k, indice + 4 + k, p_pred_meil + 5] = indicateur[0]
+    mat_affic[k, indice + 4 + k, p_pred_meil + 6] = indicateur[1]
 
 
 def Affiche_Prediction(indice, mat_affic, mat_entete, b_pred_mod, b_pred_vent,
@@ -210,7 +210,7 @@ def Affiche_Prediction(indice, mat_affic, mat_entete, b_pred_mod, b_pred_vent,
     mat_entete[p_pred_meil + 3] = "ecart meilleur"
     mat_entete[p_pred_meil + 4] = "ecart tendance"
     mat_entete[p_pred_meil + 5] = "ecart moyen"
-    mat_entete[p_pred_meil + 6] = "ecart moy filtre"
+    mat_entete[p_pred_meil + 6] = "correlation"
     for i in range(ANA_SCENARIO):
         mat_entete[p_pos_mem + i] = "moy ana " + str(i)
     for i in range(REF_SCENARIO):
