@@ -20,3 +20,14 @@ a=a[np.arange(-1,2),:]
 
 cd d:/LocalData/a179227/python/'analyse de données'/travail_git/anticipair
 
+git remote -v     ->  URL du depot distant
+git remote add pb git://github.com/paulboone/ticgit.git   -> ajout du depot distant pb
+git status   -> etat du depot local
+git add <fichier>  -> ajout d'un fichier dans le suivi
+git commit -m "essais"
+git pull  -> recuperer et fusionner ce qui a changé
+git merge   -> fusionner
+
+
+
+
