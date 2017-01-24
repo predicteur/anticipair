@@ -33,7 +33,7 @@ from constante import ANNEE_POINT, FILTRE, HEURE_POINT, HORIZON, \
     N_AFFICHE, N_COLONNE, DEBUG_PREDICTION2, DEBUG_PREDICTION3, \
     DEBUG_PREDICTION4, DEBUG_PREDICTION5, DEBUG_PREDICTION6, DEBUG_MODELE, \
     DEBUG_PREDICTION1, DEBUG_PREDICTION, I_REF, I_ANA, I_PARAM, I_VENT, \
-    I_MODELE, I_ALGO, MAXI, V_VENT
+    I_MODELE, I_ALGO, MAXI, V_VENT, ECRETE
 
 
 class predicteur:
@@ -348,57 +348,66 @@ class predicteur:
                                int(self.buffer[HEURE_POINT, T_BUFFER]))
         return date_mesure
 
-    def Tendance(self):
+    def Tendance(self, traitement=NON_FILTRE):
         """
         Fourniture de l evolution des mesures :
             ecart entre la moyenne des 2 dernieres et des 2 prochaines heures
         Entree :
-            aucune
+            traitement : 0-valeur mesuree, 1-valeur filtree, 11-valeur ecretee
+            entree optionnelle avec 0 par defaut
         Sortie :
-            tendance : valeur de l'ecart
+            tendance : valeur de l'ecart sur les donnees liees a "traitement"
         """
-        moyenne_actu = (self.buffer[NON_FILTRE, T_BUFFER] +
-                        self.buffer[NON_FILTRE, T_BUFFER-1]) / 2.0
-        moyenne_futu = (self.b_pred_meil[0, 0] + self.b_pred_meil[0, 1]) / 2.0
-        tendance = moyenne_futu - moyenne_actu
+        if traitement in (FILTRE, NON_FILTRE, ECRETE):
+            moyenne_actu = (self.buffer[traitement, T_BUFFER] +
+                            self.buffer[traitement, T_BUFFER-1]) / 2.0
+            if traitement == FILTRE:
+                moyenne_futu = (self.b_pred_filt[0, 0] +
+                                self.b_pred_filt[0, 1]) / 2.0
+            else:
+                moyenne_futu = (self.b_pred_meil[0, 0] +
+                                self.b_pred_meil[0, 1]) / 2.0
+            tendance = moyenne_futu - moyenne_actu
+        else:
+            tendance = -1.0
         return tendance
 
-    def Historique(self):
+    def Historique(self, traitement=NON_FILTRE):
         """
         Fourniture de l historique des mesures. La plus recente (T_BUFFER)
         correspond a la date fournie par Info_Date.
         Entree :
-            aucune
+            traitement : 0-valeur mesuree, 1-valeur filtree, 11-valeur ecretee
+            entree optionnelle avec 0 par defaut
         Sortie :
             histo : array de 0 (ancien) a T_BUFFER (actuel)
         """
-        histo = zeros((T_BUFFER+1))
-        histo = self.buffer[NON_FILTRE, 0:T_BUFFER+1]
+        histo = -ones((T_BUFFER+1))
+        if traitement in (FILTRE, NON_FILTRE, ECRETE):
+            histo = self.buffer[traitement, 0:T_BUFFER+1]
         return histo
 
-    def Historique_Filtre(self):
+    def Indicateur(self, histo=T_BUFFER, traitement=NON_FILTRE, horizon=1):
         """
-        Fourniture de l historique des mesures filtrees. La plus recente
-        (T_BUFFER) correspond a la date fournie par Info_Date.
-        La plus recente est calculee avec egalement la premiere estimation.
+        Indicateurs des dernières predictions sur un historique donné
+        (T_BUFFER par défaut) et pour un horizon donne (1 par defaut).
+        Renvoie -1 si des valeurs relatives sont nulles
         Entree :
-            aucune
-        Sortie :
-            histo_filtre : array de [0] (ancien) a [T_BUFFER] (actuel)
-        """
-        histo_filtre = zeros((T_BUFFER+1))
-        histo_filtre = self.buffer[FILTRE, 0:T_BUFFER+1]
-        return histo_filtre
-
-    def Ecart_Moyen(self, horizon=1):
-        """
-        Moyenne des ecarts absolus et relatif des 5 dernières predictions
-        pour un horizon donne (1 par defaut).
-        Renvoie -1 si les 5 dernieres valeurs sont nulles
-        Entree :
+            Histo : historique de calcul (T_BUFFER par défaut)
             Horizon : horizon de prediction choisi (1 par defaut)
+            traitement : donnee d'entree -> 0-valeur mesuree, 1-valeur filtree,
+            11-valeur ecretee(0 par defaut)
         Sortie :
-            ecart_moyen : array avec [0] pour ecart absolu et [1] pour relatif
+            indic : array avec
+                [0] pour MAE(Mean Absolute Error): Erreur absolue moyenne
+                [1] pour PCC(Pearson Correlation Coefficient) : 1 OK, 0 KO
+                [2] pour ME(Mean Error) : biais
+                [3] pour EV(Error Variance) : Variance
+                [4] pour MSE(Mean Square Error) : Erreur quadratique
+                [5] pour MSPE(Mean Square Percentage Error)
+                [6] pour MAPE(Mean Absolute Percentage Error)
+                [7] pour RMSE(Root Mean Square Error) : Erreur type
+                [8] pour RMSPE(Root Mean Square Percentrage Error)
         """
         ecart_moyen = zeros((2))
         ecart_moyen[1] = -1.0
