@@ -108,7 +108,7 @@ def Essai_Predicteur1():
 
 def Essai_Predicteur2():
     """ essai sans reinitialisation de la classe """
-    N_RESULT = 50    # nombre de donnees traitees (9000), 90, 900, 3600
+    N_RESULT = 80    # nombre de donnees traitees (9000), 90, 900, 3600
     N_DEPART = 1    # premiere ligne des donnees traitees, 26
     reset_prediction = True
     resultat = zeros((HORIZON))
@@ -129,7 +129,7 @@ def Essai_Predicteur2():
         # resultat = pred1.Prediction(nouv_valeur, vitesse_vent=v_vent)
         # resultat = pred1.Prediction(nouv_valeur, modele=mod_air)
         # resultat = pred1.Prediction(nouv_valeur, v_vent, mod_air)
-        print("valeur : ", nouv_valeur[0], pred1.Info_Date(), " prévu : ", resultat)
+        # print("valeur : ", nouv_valeur[0], pred1.Info_Date(), " prévu : ", resultat)
         date_mesure = pred1.Info_Date()
         tendance = pred1.Tendance()
         indicateur = pred1.Indicateur(23)
@@ -138,8 +138,8 @@ def Essai_Predicteur2():
         print("indicateur", indicateur)
         if instant % 100 == 0:
             print("instant : ", instant)
-        # if instant == N_RESULT:
-        #     pred1.Debug_Pred()
+        if instant == N_RESULT:
+            pred1.Debug_Pred()
     del pred1
 
 Essai_Predicteur2()

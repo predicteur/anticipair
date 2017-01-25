@@ -8,6 +8,7 @@ Methodes de la classe predicteur
 from datetime import datetime
 from math import sqrt
 from numpy import ones, zeros, load, save, arange, loadtxt
+from scipy import stats
 
 from algorithme_prediction import AcquisitionBuffer, Mesure_Ecart_Predicteur, \
     Apprentissage_Prediction, Meilleure_Prediction, Analyse, \
@@ -409,19 +410,21 @@ class predicteur:
                 [8] pour RMSPE(Root Mean Square Percentrage Error)
         """
         indic = zeros((9))
+        a = zeros((histo))
+        b = zeros((histo))
         relatif_ko = False
         for i in range(histo):
-            indic[0] += abs(self.buffer[traitement, T_BUFFER-i] -
-                            self.b_pred_meil[horizon+i, horizon-1])
-            indic[2] += (self.buffer[traitement, T_BUFFER-i] -
-                         self.b_pred_meil[horizon+i, horizon-1])
-            indic[4] += (self.buffer[traitement, T_BUFFER-i] -
-                         self.b_pred_meil[horizon+i, horizon-1]) ** 2
+            a[i] = self.buffer[traitement, T_BUFFER-i]
+            b[i] = self.b_pred_meil[horizon+i, horizon-1]
+            indic[0] += abs(a[i] - b[i])
+            indic[2] += (a[i] - b[i])
+            indic[4] += (a[i] - b[i]) ** 2
             if self.buffer[traitement, T_BUFFER - i] > 0.1:
-                indic[6] = indic[0] / self.buffer[traitement, T_BUFFER - i]
-                indic[5] = indic[4] / self.buffer[traitement, T_BUFFER - i]
+                indic[7] = indic[0] / self.buffer[traitement, T_BUFFER - i]
+                indic[6] = indic[4] / self.buffer[traitement, T_BUFFER - i]
             else:
                 relatif_ko = True
+        print("a puis b", a, b)
         indic[0] /= histo
         indic[2] /= histo
         indic[4] /= histo
@@ -435,6 +438,7 @@ class predicteur:
             indic[6] /= (histo + 1)
             indic[7] /= (histo + 1)
             indic[8] = sqrt(indic[5])
+        (indic[1], c) = stats.pearsonr(a, b)
         return indic
 
     def Ecart_Tendance(self):
