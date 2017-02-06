@@ -7,6 +7,7 @@ Methodes de la classe predicteur
 
 import os
 from datetime import datetime
+from math import sqrt
 
 from numpy import ones, zeros, load, save, arange, loadtxt
 
@@ -28,7 +29,8 @@ from anticipair.constante import ANNEE_POINT, FILTRE, HEURE_POINT, HORIZON, \
     N_AFFICHE, N_COLONNE, DEBUG_PREDICTION2, DEBUG_PREDICTION3, \
     DEBUG_PREDICTION4, DEBUG_PREDICTION5, DEBUG_PREDICTION6, DEBUG_MODELE, \
     DEBUG_PREDICTION1, DEBUG_PREDICTION, I_REF, I_ANA, I_PARAM, I_VENT, \
-    I_MODELE, I_ALGO, MAXI, V_VENT
+    I_MODELE, I_ALGO, MAXI, V_VENT, ECRETE
+
 from anticipair.constante_instal import FILE_DEBUG, FILE_BIBLIO
 from anticipair.modele import Predicteur_Correlation_Modele
 from anticipair.parametre import Predicteur_Parametre
@@ -250,8 +252,7 @@ class predicteur:
             Affiche_Prediction_Complement(self.instant, self.mat_affic,
                                           self.Tendance(),
                                           self.Ecart_Tendance(),
-                                          self.Ecart_Moyen(),
-                                          self.Ecart_Moyen_Filtre())
+                                          self.Indicateur(24))
         # stockage des parametres
         nom_fichier = os.path.join("series", "serie" + str(self.serie))
         fichier = open(nom_fichier, "wb")
@@ -348,93 +349,94 @@ class predicteur:
                                int(self.buffer[HEURE_POINT, T_BUFFER]))
         return date_mesure
 
-    def Tendance(self):
+    def Tendance(self, traitement=NON_FILTRE):
         """
         Fourniture de l evolution des mesures :
             ecart entre la moyenne des 2 dernieres et des 2 prochaines heures
         Entree :
-            aucune
+            traitement : 0-valeur mesuree, 1-valeur filtree, 11-valeur ecretee
+            entree optionnelle avec 0 par defaut
         Sortie :
-            tendance : valeur de l'ecart
+            tendance : valeur de l'ecart sur les donnees liees a "traitement"
         """
-        moyenne_actu = (self.buffer[NON_FILTRE, T_BUFFER] +
-                        self.buffer[NON_FILTRE, T_BUFFER-1]) / 2.0
-        moyenne_futu = (self.b_pred_meil[0, 0] + self.b_pred_meil[0, 1]) / 2.0
-        tendance = moyenne_futu - moyenne_actu
+        if traitement in (FILTRE, NON_FILTRE, ECRETE):
+            moyenne_actu = (self.buffer[traitement, T_BUFFER] +
+                            self.buffer[traitement, T_BUFFER-1]) / 2.0
+            if traitement == FILTRE:
+                moyenne_futu = (self.b_pred_filt[0, 0] +
+                                self.b_pred_filt[0, 1]) / 2.0
+            else:
+                moyenne_futu = (self.b_pred_meil[0, 0] +
+                                self.b_pred_meil[0, 1]) / 2.0
+            tendance = moyenne_futu - moyenne_actu
+        else:
+            tendance = -1.0
         return tendance
 
-    def Historique(self):
+    def Historique(self, traitement=NON_FILTRE):
         """
         Fourniture de l historique des mesures. La plus recente (T_BUFFER)
         correspond a la date fournie par Info_Date.
         Entree :
-            aucune
+            traitement : 0-valeur mesuree, 1-valeur filtree, 11-valeur ecretee
+            entree optionnelle avec 0 par defaut
         Sortie :
             histo : array de 0 (ancien) a T_BUFFER (actuel)
         """
-        histo = zeros((T_BUFFER+1))
-        histo = self.buffer[NON_FILTRE, 0:T_BUFFER+1]
+        histo = -ones((T_BUFFER+1))
+        if traitement in (FILTRE, NON_FILTRE, ECRETE):
+            histo = self.buffer[traitement, 0:T_BUFFER+1]
         return histo
 
-    def Historique_Filtre(self):
+    def Indicateur(self, histo=T_BUFFER, traitement=NON_FILTRE, horizon=1):
         """
-        Fourniture de l historique des mesures filtrees. La plus recente
-        (T_BUFFER) correspond a la date fournie par Info_Date.
-        La plus recente est calculee avec egalement la premiere estimation.
+        Indicateurs des dernières predictions sur un historique donné
+        (T_BUFFER-1 par défaut) et pour un horizon donne (1 par defaut).
+        Renvoie -1 si des valeurs relatives sont nulles
         Entree :
-            aucune
-        Sortie :
-            histo_filtre : array de [0] (ancien) a [T_BUFFER] (actuel)
-        """
-        histo_filtre = zeros((T_BUFFER+1))
-        histo_filtre = self.buffer[FILTRE, 0:T_BUFFER+1]
-        return histo_filtre
-
-    def Ecart_Moyen(self, horizon=1):
-        """
-        Moyenne des ecarts absolus et relatif des 5 dernières predictions
-        pour un horizon donne (1 par defaut).
-        Renvoie -1 si les 5 dernieres valeurs sont nulles
-        Entree :
+            Histo : historique de calcul (T_BUFFER par défaut)
             Horizon : horizon de prediction choisi (1 par defaut)
-        Sortie :
-            ecart_moyen : array avec [0] pour ecart absolu et [1] pour relatif
+            traitement : donnee d'entree -> 0-valeur mesuree, 1-valeur filtree,
+            11-valeur ecretee(0 par defaut)
+        Sortie : indic : array avec
+                [0] pour MAE(Mean Absolute Error): Erreur absolue moyenne
+                [1] pour PCC(Pearson Correlation Coefficient) : 1 OK, 0 KO
+                [2] pour ME(Mean Error) : biais
+                [3] pour EV(Error Variance) : Variance
+                [4] pour MSE(Mean Square Error) : Erreur quadratique
+                [5] pour RMSE(Root Mean Square Error) : Erreur type
+                [6] pour MSPE(Mean Square Percentage Error)
+                [7] pour MAPE(Mean Absolute Percentage Error)
+                [8] pour RMSPE(Root Mean Square Percentrage Error)
         """
-        ecart_moyen = zeros((2))
-        ecart_moyen[1] = -1.0
-        valeurs = 0.0
-        for i in range(5):
-            ecart_moyen[0] += abs(self.buffer[NON_FILTRE, T_BUFFER-i] -
-                                  self.b_pred_meil[horizon+i, horizon-1])
-            valeurs += self.buffer[NON_FILTRE, T_BUFFER - i]
-        if valeurs > 0.1:
-            ecart_moyen[1] = ecart_moyen[0] / valeurs
-        ecart_moyen[0] /= 5.0
-
-        return ecart_moyen
-
-    def Ecart_Moyen_Filtre(self, horizon=1):
-        """
-        Moyenne des ecarts absolus et relatif des 5 dernières predictions
-        filtrees pour un horizon donne (1 par defaut).
-        Renvoie -1 si les 5 dernieres valeurs sont nulles
-        Entree :
-            Horizon : horizon de prediction choisi (1 par defaut)
-        Sortie :
-            ecart_moyen : array avec [0] pour ecart absolu et [1] pour relatif
-        """
-        ecart_moyen_f = zeros((2))
-        ecart_moyen_f[1] = -1.0
-        valeurs = 0.0
-        for i in range(5):
-            ecart_moyen_f[0] += abs(self.buffer[FILTRE, T_BUFFER - i] -
-                                    self.b_pred_filt[horizon + i, horizon - 1])
-            valeurs += self.buffer[FILTRE, T_BUFFER-i]
-        if valeurs > 0.1:
-            ecart_moyen_f[1] = ecart_moyen_f[0] / valeurs
-        ecart_moyen_f[0] /= 5.0
-
-        return ecart_moyen_f
+        indic = zeros((9))
+        relatif_ko = False
+        for i in range(histo):
+            indic[0] += abs(self.buffer[traitement, T_BUFFER-i] -
+                            self.b_pred_meil[horizon+i, horizon-1])
+            indic[2] += (self.buffer[traitement, T_BUFFER-i] -
+                         self.b_pred_meil[horizon+i, horizon-1])
+            indic[4] += (self.buffer[traitement, T_BUFFER-i] -
+                         self.b_pred_meil[horizon+i, horizon-1]) ** 2
+            if self.buffer[traitement, T_BUFFER - i] > 0.1:
+                indic[6] = indic[0] / self.buffer[traitement, T_BUFFER - i]
+                indic[5] = indic[4] / self.buffer[traitement, T_BUFFER - i]
+            else:
+                relatif_ko = True
+        indic[0] /= histo
+        indic[2] /= histo
+        indic[4] /= histo
+        indic[5] = sqrt(indic[4])
+        indic[3] = indic[4] - indic[2] ** 2
+        if relatif_ko:
+            indic[6] = -1.0
+            indic[7] = -1.0
+            indic[8] = -1.0
+        else:
+            indic[6] /= (histo + 1)
+            indic[7] /= (histo + 1)
+            indic[8] = sqrt(indic[5])
+        return indic
 
     def Ecart_Tendance(self):
         """
