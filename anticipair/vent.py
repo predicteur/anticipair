@@ -9,9 +9,9 @@ Procédures du prédicteur vent
 """
 
 
-from constante import HORIZON, NON_FILTRE, V_VENT, T_BUFFER, VENT_SCENARIO, \
+from anticipair.constante import HORIZON, NON_FILTRE, V_VENT, T_BUFFER, VENT_SCENARIO, \
     VENT_PRED, PARA_SENS, VENT_MIN, HEURE_POINT, BUF_SERIE
-from reference import min_max
+from anticipair.reference import min_max
 
 
 def Predicteur_Correlation_Vent(b_pred_vent, b_pred_meil, vitesse_vent,

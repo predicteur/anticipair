@@ -8,10 +8,11 @@ Algorithme de prédiction lié aux différents prédicteurs
 Methodes communes
 """
 
-from numpy import zeros, argsort, ones
 from datetime import datetime
-from reference import min_max
-from constante import ACTIVATION_ANA, ACTIVATION_PARAM, ACTIVATION_REF,\
+
+from numpy import zeros, argsort, ones
+
+from anticipair.constante import ACTIVATION_ANA, ACTIVATION_PARAM, ACTIVATION_REF,\
     ANA_SCENARIO, ANNEE_POINT, DATE_INIT, DEB_MATIN, DEB_MIDI, \
     DEB_SOIR, FILTRE, HEURE_POINT, HORIZON, INTER_POINT, JOUR_POINT, \
     MATIN, MIDI, MOIS_POINT, NB_PREDICTEURS, NON_FILTRE,\
@@ -23,6 +24,7 @@ from constante import ACTIVATION_ANA, ACTIVATION_PARAM, ACTIVATION_REF,\
     N_PREDIC2, N_PREDIC3, N_MEMOIRE, N_PENAL, OPTI_ALGO, \
     ACTIVATION_VENT, V_MODELE, MODELE_SCENARIO, ACTIVATION_MODELE, \
     NB_PRED_REDUIT, MAXI, NB_ALGO_REDUIT, ECART, ECRETE
+from anticipair.reference import min_max
 
 
 def Analyse(valeur, buffer):

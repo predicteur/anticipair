@@ -3,12 +3,14 @@
 
 """Test Anticipair."""
 
-
-import unittest
+import os
 import datetime
+import unittest
+
 import pandas
-import constante_instal
-import predicteur as pred
+
+import anticipair.predicteur as predicteur
+from anticipair import constante_instal
 
 
 class TestAnticipair(unittest.TestCase):
@@ -16,7 +18,8 @@ class TestAnticipair(unittest.TestCase):
         mesure = 'N2CINQ'
 
         # Lecture du jeu de données test
-        dat = pandas.read_csv('data.csv', sep=',', parse_dates=[0, ],
+        fndat = os.path.join('data', 'data.csv')
+        dat = pandas.read_csv(fndat, sep=',', parse_dates=[0, ],
                               index_col=('dateheure',))
 
         # Préparation des données
@@ -28,16 +31,16 @@ class TestAnticipair(unittest.TestCase):
 
         # Anticipair
         resultat = None
-        pred1 = pred.predicteur(constante_instal.__dict__[mesure],
-                                reset_prediction=True)
+        pred = predicteur.predicteur(constante_instal.__dict__[mesure],
+                                     reset_prediction=True)
         for i, enr in dat.iterrows():
-            resultat = pred1.Prediction(
+            resultat = pred.Prediction(
                 [enr[mesure], enr['heure'], enr['jour'], enr['mois'],
                  enr['annee']])
 
         # Vérification
         self.assertEqual(
-            pred1.Info_Date(), datetime.datetime(2017, 1, 17, 14, 0, 0))
+            pred.Info_Date(), datetime.datetime(2017, 1, 17, 14, 0, 0))
         self.assertEqual(len(resultat), 6)
         self.assertEqual(round(resultat[0]), 32)
         self.assertEqual(round(resultat[1]), 38)

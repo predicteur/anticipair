@@ -8,13 +8,15 @@ Procédures du prédicteur par analogie
 
 """
 
-from numpy import zeros
 from math import sqrt
-from reference import min_max
-from constante import ANA_ECART_MC, ANA_HEURE, ANA_PROFONDEUR, ANA_SCENARIO, \
+
+from numpy import zeros
+
+from anticipair.constante import ANA_ECART_MC, ANA_HEURE, ANA_PROFONDEUR, ANA_SCENARIO, \
     ANNEE_POINT, HEURE_POINT, HORIZON, JOUR_POINT, MAXI, MOIS_POINT, \
     PRED_RESULTAT, T_BUFFER, V_MOYENNE, ANA_V_VENT, V_VENT, VENT_PARANA, \
     BUF_SERIE, BIB_SERIE, NON_FILTRE
+from anticipair.reference import min_max
 
 
 def Apprentissage_Analogie(h_pred, b_pred_ana, mem_moy_ana, buffer):

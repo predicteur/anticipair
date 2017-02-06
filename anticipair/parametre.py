@@ -8,11 +8,12 @@ Procédures liées au prédicteur par paramètre
 """
 
 from numpy import zeros, dot, linalg
-from reference import min_max
-from constante import ANNEE_POINT, HEURE_POINT, HORIZON, \
+
+from anticipair.constante import ANNEE_POINT, HEURE_POINT, HORIZON, \
     JOUR_POINT, MAXI, MOIS_POINT, NON_FILTRE, PARA_ECART_MC, \
     PARA_HEURE, PARA_HORIZON_POINT, PRED_RESULTAT, T_BUFFER, TYPE_POINT, \
     PARA_V_VENT, V_VENT, VENT_PARANA, BUF_SERIE, BIB_SERIE
+from anticipair.reference import min_max
 
 
 def Predicteur_Parametre(res_param, b_pred_param, mem_param, donnees, buffer,

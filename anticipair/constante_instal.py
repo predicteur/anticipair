@@ -19,17 +19,18 @@ Fichier d'ecriture :
     Le fichier est écrasé à chaque simulation.
 """
 
+import os
 
 # bibliotheque : historique des donnees
 
 # si fichier Morgan
-#FILE_BIBLIO = """./apprentissage_Morgan.csv"""
+# FILE_BIBLIO = os.path.join("data", "apprentissage_Morgan.csv")
 PCCINQ_MORGAN = 4  # colonne de la serie
 VV1_MORGAN = 5  # colonne de la serie
 VV2_MORGAN = 6  # colonne de la serie
 
 # si fichier general
-FILE_BIBLIO = """./Biblio_2014-2015_export.csv"""
+FILE_BIBLIO = os.path.join("data", "Biblio_2014-2015_export.csv")
 N2AIXA = 4  # colonne de la serie
 N2AIXC = 5  # colonne de la serie
 N2CINQ = 6  # colonne de la serie
@@ -47,4 +48,4 @@ PCSTLO = 17  # colonne de la serie
 AIXVV = 18  # colonne de la serie
 
 # fichier de debug des donnees
-FILE_DEBUG = """./debug_prediction"""
+FILE_DEBUG = "debug_prediction"

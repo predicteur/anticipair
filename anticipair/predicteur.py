@@ -5,28 +5,23 @@ Created on Fri Jul 29 20:07:02 2016
 Methodes de la classe predicteur
 """
 
+import os
 from datetime import datetime
 from math import sqrt
+
 from numpy import ones, zeros, load, save, arange, loadtxt
 from scipy import stats
 
-from algorithme_prediction import AcquisitionBuffer, Mesure_Ecart_Predicteur, \
-    Apprentissage_Prediction, Meilleure_Prediction, Analyse, \
-    Apprentissage_Algorithme
-from affiche import Affiche_Buffer, Affiche_Donnees_Traitees, \
+from anticipair.affiche import Affiche_Buffer, Affiche_Donnees_Traitees, \
     Affiche_Analogie, Affiche_Parametre, Affiche_Reference, \
     Affiche_Prediction, Affiche_Vent, Affiche_Algo, Affiche_Constante, \
     Affiche_Prediction_Complement, Affiche_Modele
-from analogie import Apprentissage_Analogie, Predicteur_Analogie
-from parametre import Predicteur_Parametre
-from reference import Predicteur_Reference
-from bibliotheque import Init_Bibliotheque
-from vent import Predicteur_Correlation_Vent
-from modele import Predicteur_Correlation_Modele
-
-from constante_instal import FILE_BIBLIO, FILE_DEBUG
-
-from constante import ANNEE_POINT, FILTRE, HEURE_POINT, HORIZON, \
+from anticipair.algorithme_prediction import AcquisitionBuffer, \
+    Mesure_Ecart_Predicteur, Apprentissage_Prediction, Meilleure_Prediction, \
+    Analyse, Apprentissage_Algorithme
+from anticipair.analogie import Apprentissage_Analogie, Predicteur_Analogie
+from anticipair.bibliotheque import Init_Bibliotheque
+from anticipair.constante import ANNEE_POINT, FILTRE, HEURE_POINT, HORIZON, \
     JOUR_POINT, MOIS_POINT, NON_FILTRE, PRED_RESULTAT, T_BUFFER, \
     NB_PREDICTEURS, ANA_SCENARIO, C_MEM_ANA, C_MEM_PARAM, MODELE_SCENARIO, \
     DEBUG_ANALOGIE, DEBUG_BUFFER, DEBUG_DONNEES, DEBUG_PARAMETRE, N_ATTRIBUT,\
@@ -36,6 +31,12 @@ from constante import ANNEE_POINT, FILTRE, HEURE_POINT, HORIZON, \
     DEBUG_PREDICTION4, DEBUG_PREDICTION5, DEBUG_PREDICTION6, DEBUG_MODELE, \
     DEBUG_PREDICTION1, DEBUG_PREDICTION, I_REF, I_ANA, I_PARAM, I_VENT, \
     I_MODELE, I_ALGO, MAXI, V_VENT, ECRETE
+
+from anticipair.constante_instal import FILE_DEBUG, FILE_BIBLIO
+from anticipair.modele import Predicteur_Correlation_Modele
+from anticipair.parametre import Predicteur_Parametre
+from anticipair.reference import Predicteur_Reference
+from anticipair.vent import Predicteur_Correlation_Vent
 
 
 class predicteur:
@@ -121,7 +122,7 @@ class predicteur:
 
         # rechargement des parametres de h-1
         if reset_prediction is False:
-            nom_fichier = "serie" + str(self.serie)
+            nom_fichier = os.path.join("series", "serie" + str(self.serie))
             fichier = open(nom_fichier, "rb")
             self.buffer = load(fichier)
             self.b_pred_unit = load(fichier)
@@ -254,7 +255,7 @@ class predicteur:
                                           self.Ecart_Tendance(),
                                           self.Indicateur(24))
         # stockage des parametres
-        nom_fichier = "serie" + str(self.serie)
+        nom_fichier = os.path.join("series", "serie" + str(self.serie))
         fichier = open(nom_fichier, "wb")
         save(fichier, self.buffer)
         save(fichier, self.b_pred_unit)
