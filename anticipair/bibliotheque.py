@@ -6,11 +6,12 @@ Methode de chargement de la bibliotheque historique
 """
 
 from numpy import loadtxt, percentile
-from constante_instal import FILE_BIBLIO
-from constante import ANNEE_POINT, DEB_MATIN, DEB_MIDI, DEB_SOIR, \
+
+from anticipair.constante import ANNEE_POINT, DEB_MATIN, DEB_MIDI, DEB_SOIR, \
     FILTRE, HEURE_POINT, INTER_POINT, JOUR_POINT, MATIN, MAXI, MAX_SEQ, MIDI,\
     MIN_SEQ, MOIS_POINT, NB_SEQ, NON_FILTRE, NUIT, PARA_SENS, \
     SEQUENCE, SOIR, TYPE_POINT, V_VENT, ECART, ECRETE, SEUIL_ECRETAGE
+from anticipair.constante_instal import FILE_BIBLIO
 
 
 def Init_Bibliotheque(serie_a_traiter, serie_vent, data, min_max):

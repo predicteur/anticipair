@@ -7,9 +7,7 @@ Created on Sat Aug  6 13:19:04 2016
 Affichage des valeurs intermédiaires pour debug (console et/ou fichier)
 """
 
-from constante_instal import FILE_BIBLIO
-
-from constante import ANA_SCENARIO, FILTRE, HEURE_POINT, \
+from anticipair.constante import ANA_SCENARIO, FILTRE, HEURE_POINT, \
     HORIZON, NB_PREDICTEURS, NON_FILTRE, PRED_RESULTAT, SEQUENCE, \
     T_BUFFER, TYPE_POINT, VENT_SCENARIO, NB_ALGO, REF_SCENARIO, \
     I_ANA, I_PARAM, I_MEILLEUR, I_REF, I_VENT, I_ALGO, \
@@ -21,6 +19,7 @@ from constante import ANA_SCENARIO, FILTRE, HEURE_POINT, \
     ACTIVATION_MAUVAIS, OPTI_ALGO, I_MODELE, MODELE_SCENARIO, \
     ACTIVATION_MODELE, NB_PRED_REDUIT, NB_ALGO_REDUIT, MAX_VARIATION, \
     MAX_VALEUR, ECRETE
+from anticipair.constante_instal import FILE_BIBLIO
 
 
 def Affiche_Donnees_Traitees(donnees):

@@ -7,7 +7,7 @@ Created on Sat Aug  6 15:45:55 2016
 Procédures du prédicteur de référence
 """
 
-from constante import HORIZON, NON_FILTRE, T_BUFFER, BUF_SERIE, \
+from anticipair.constante import HORIZON, NON_FILTRE, T_BUFFER, BUF_SERIE, \
     REF_PENTE, HEURE_POINT, DEB_MATIN, MATIN, DEB_MIDI, MIDI, DEB_SOIR, SOIR, \
     NUIT, MAX_SEQ, MAX_VARIATION, REF_SCENARIO, MAX_VALEUR, REF_MOYENNE
 

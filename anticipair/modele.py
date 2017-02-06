@@ -8,10 +8,9 @@ Procédures du prédicteur lié a la modelisation
 
 """
 
-
-from reference import min_max
-from constante import HORIZON, NON_FILTRE, BUF_SERIE, V_MODELE, \
+from anticipair.constante import HORIZON, NON_FILTRE, BUF_SERIE, V_MODELE, \
     T_BUFFER, MODELE_SCENARIO, MODELE_PRED, MODELE_MIN, HEURE_POINT
+from anticipair.reference import min_max
 
 
 def Predicteur_Correlation_Modele(b_pred_mod, b_pred_meil, modele,
