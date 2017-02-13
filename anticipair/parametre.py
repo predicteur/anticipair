@@ -48,6 +48,7 @@ def Cherche_Candidat_Parametre(res_param, mem_param, donnees, buffer):
     annee_actuel = buffer[ANNEE_POINT, T_BUFFER]
 
     # recherche sur toute la plage (sauf val courante), valeur n_test a tester
+    n_dep = 24
     for i in range(25):
         if donnees[HEURE_POINT, i] == buffer[HEURE_POINT, T_BUFFER]:
             n_dep = i + 24

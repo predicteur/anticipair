@@ -54,17 +54,19 @@ def Valeurs_Morgan():
     """
     chargement et initialisation des mesures
     fichier bibliotheque : 13866 lignes
-    fichier mesure : 3672 lignes
+    fichier mesure : 3672 lignes (moins lignes supprimees)
     annee, mois, jour, heure : colonne 0 à 3
     mesure : colonne 4
     valeur du vent : colonne 5 ou 6
     valeur du mod_air : colonne 7
     """
     # fichier_mesure = os.path.join('data', 'mesures_Morgan2.csv')
-    fichier_mesure = os.path.join('data', 'mesures_Morgan.csv')
+    fichier_mesure = os.path.join('data', 'mesures_Morgan3.csv')
+    # fichier_mesure = os.path.join('data', 'mesures_Morgan.csv')
     mesure_brut = loadtxt(fichier_mesure, delimiter=';', skiprows=1)
     serie_vent = 6
-    N_LIGNE_MESURE = 3672
+    # N_LIGNE_MESURE = 3672
+    N_LIGNE_MESURE = 3672 - 3
     mesure = zeros((N_ATTRIBUT+1, N_LIGNE_MESURE+1))
     for i in range(1, N_LIGNE_MESURE):
         mesure[ANNEE_POINT, i] = mesure_brut[i - 1, 0]
@@ -108,7 +110,7 @@ def Essai_Predicteur1():
 
 def Essai_Predicteur2():
     """ essai sans reinitialisation de la classe """
-    N_RESULT = 80    # nombre de donnees traitees (9000), 90, 900, 3600
+    N_RESULT = 60    # nombre de donnees traitees (9000), 90, 900, 3600
     N_DEPART = 1    # premiere ligne des donnees traitees, 26
     reset_prediction = True
     resultat = zeros((HORIZON))
@@ -125,17 +127,16 @@ def Essai_Predicteur2():
         nouv_valeur = Lecture_Nouvelle_Valeur(instant-1, mesure)
         v_vent = Lecture_Nouvelle_Valeur_Vent(instant-1, mesure)
         mod_air = Lecture_Nouvelle_Valeur_Modele(instant-1, mesure)
-        resultat = pred1.Prediction(nouv_valeur)
+        resultat = pred1.Prediction(nouv_valeur, filtre=False)
         # resultat = pred1.Prediction(nouv_valeur, vitesse_vent=v_vent)
         # resultat = pred1.Prediction(nouv_valeur, modele=mod_air)
         # resultat = pred1.Prediction(nouv_valeur, v_vent, mod_air)
         # print("valeur : ", nouv_valeur[0], pred1.Info_Date(), " prévu : ", resultat)
         date_mesure = pred1.Info_Date()
         tendance = pred1.Tendance()
-        indicateur = pred1.Indicateur(23)
+        # indicateur = pred1.Indicateur(23)
         ecart_tendance = pred1.Ecart_Tendance()
-        # resultat_filtre = pred1.Prediction_Filtre(nouv_valeur, v_vent)
-        print("indicateur", indicateur)
+        # print("indicateur", indicateur)
         if instant % 100 == 0:
             print("instant : ", instant)
         if instant == N_RESULT:

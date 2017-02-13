@@ -125,7 +125,7 @@ MODELE_PRED = True  # activation sur les valeurs prédites (false->derns vals)
 # predicteur reference : parametres de reglage
 REF_SCENARIO = 4    # nombre de predicteurs de reference
 REF_PENTE = 1.0    # pente du predicteurs de reference (par défaut valeur 1)
-REF_MOYENNE = T_BUFFER  # moyenne du predicteurs de reference
+REF_MOYENNE = 24  # moyenne predicteur reference (inferieur à T_BUFFER)
 # predicteur analogie : parametres de reglage
 PRED_RESULTAT = 5   # nombre de meilleurs candidats conserves pour ana et param
 ANA_PROFONDEUR = 8    # nombre d heures de comparaison

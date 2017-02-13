@@ -21,8 +21,9 @@ def Predicteur_Reference(b_pred_ref, b_pred_meil, b_pred_filt, buffer,
     valeur_pred_ref = buffer[BUF_SERIE, T_BUFFER] + REF_PENTE * \
         (buffer[BUF_SERIE, T_BUFFER] - buffer[BUF_SERIE, T_BUFFER - 1])
     valeur_pred_ref1 = 0.0
-    for i in range(T_BUFFER-REF_MOYENNE+1, T_BUFFER+1):
-        valeur_pred_ref1 += buffer[BUF_SERIE, i] / REF_MOYENNE
+    if T_BUFFER >= REF_MOYENNE:
+        for i in range(T_BUFFER-REF_MOYENNE+1, T_BUFFER+1):
+            valeur_pred_ref1 += buffer[BUF_SERIE, i] / REF_MOYENNE
 
     # affectation des valeurs predites
     for k in range(HORIZON):

@@ -9,7 +9,7 @@ import os
 from datetime import datetime
 from math import sqrt
 
-from numpy import ones, zeros, load, save, arange, loadtxt
+from numpy import ones, zeros, load, save, arange, loadtxt, mean
 from scipy import stats
 
 from anticipair.affiche import Affiche_Buffer, Affiche_Donnees_Traitees, \
@@ -30,7 +30,8 @@ from anticipair.constante import ANNEE_POINT, FILTRE, HEURE_POINT, HORIZON, \
     N_AFFICHE, N_COLONNE, DEBUG_PREDICTION2, DEBUG_PREDICTION3, \
     DEBUG_PREDICTION4, DEBUG_PREDICTION5, DEBUG_PREDICTION6, DEBUG_MODELE, \
     DEBUG_PREDICTION1, DEBUG_PREDICTION, I_REF, I_ANA, I_PARAM, I_VENT, \
-    I_MODELE, I_ALGO, MAXI, V_VENT, ECRETE
+    I_MODELE, I_ALGO, MAXI, V_VENT, ECRETE, TIME_HEURE, VAL_ANNEE, VAL_MOIS, \
+    VAL_JOUR, VAL_HEURE, VAL_VALEUR
 
 from anticipair.constante_instal import FILE_DEBUG, FILE_BIBLIO
 from anticipair.modele import Predicteur_Correlation_Modele
@@ -278,63 +279,58 @@ class predicteur:
         return resultat
 
     def Prediction(self, valeur_mesuree, vitesse_vent=-ones((HORIZON + 1)),
-                   modele=-ones((HORIZON + 1))):
+                   modele=-ones((HORIZON + 1)), filtre=False):
         """
             Calcul des valeurs predites :
                 si les données d'entree sont incohérentes, retourne - 1
-                si les données d'entree sont actuelles, retourne la valeur
-                actuelle
+                si les données d'entree sont actuelles, pas de calcul
                 si l'historique n'est pas suffisant (5 valeurs), retourne 0
+                La prediction concerne l'instant h+1, si les donnees sont a
+                h+n, le calcul se fait avec des predictions intermediaires
             Entree :
                 Valeur_mesurée : array avec annee, mois, jour, heure et valeur
                 vitesse-vent : optionnel, array de [0] a [HORIZON] prevu
                 modele : optionnel, array de [0] a [HORIZON] prevu
+                filtre : optionnel, type de sortie filtree(True) ou non(False)
             Sortie :
-                Valeurs prédites : array de [0] a [HORIZON]
+                Valeurs prédites : array de [0] a [HORIZON] filtree ou non
         """
         res = -ones((HORIZON))
 
         # lancement de la prediction si besoin
         validation = Analyse(valeur_mesuree, self.buffer)
-        if validation == 1:
-            res = self.Prediction_Valeur(valeur_mesuree, vitesse_vent, modele)
+        valeur_inter = zeros((5))
+        if validation >= 1:
+            for i in range(validation):
+                if i < validation-1:
+                    date_buffer = datetime(
+                        int(self.buffer[ANNEE_POINT, T_BUFFER]),
+                        int(self.buffer[MOIS_POINT, T_BUFFER]),
+                        int(self.buffer[JOUR_POINT, T_BUFFER]),
+                        int(self.buffer[HEURE_POINT, T_BUFFER]))
+                    date_inter = date_buffer + (i + 1) * TIME_HEURE
+                    valeur_inter[VAL_ANNEE] = date_inter.year
+                    valeur_inter[VAL_MOIS] = date_inter.month
+                    valeur_inter[VAL_JOUR] = date_inter.day
+                    valeur_inter[VAL_HEURE] = date_inter.day
+                    valeur_inter[VAL_VALEUR] = \
+                        mean(self.Historique()[T_BUFFER-23:T_BUFFER+1])
+                    res = self.Prediction_Valeur(valeur_inter, vitesse_vent,
+                                                 modele)
+                else:
+                    res = self.Prediction_Valeur(valeur_mesuree, vitesse_vent,
+                                                 modele)
+                    if filtre:
+                        res = self.b_pred_filt[0, :]
         elif validation == 0:  # pas de recalcul
             res = self.b_pred_meil[0, :]
+            if filtre:
+                res = self.b_pred_filt[0, :]
 
         # pas de restitution si historique insuffisant
         if self.buffer[NON_FILTRE, T_BUFFER-4] == 0 and validation != -1:
             res = zeros((HORIZON))
         return res
-
-    def Prediction_Filtre(self, valeur_mesuree,
-                          vitesse_vent=-ones((HORIZON + 1)),
-                          modele=-ones((HORIZON + 1))):
-        """
-            Calcul des valeurs predites filtrees :
-                si les données d'entree sont incohérentes, retourne - 1
-                si les données d'entree sont actuelles, pas de prediction
-                si l'historique n'est pas suffisant (5 valeurs), retourne 0
-            Entree :
-                valeur_mesuree : array avec annee, mois, jour, heure et valeur
-                vitesse-vent : optionnel, array de [0] a [HORIZON]
-                modele : optionnel, array de [0] a [HORIZON]
-            Sortie :
-                valeurs prédites filtrees : array de [0] a [HORIZON]
-        """
-        resf = -ones((HORIZON))
-
-        # lancement de la prediction si besoin
-        validation = Analyse(valeur_mesuree, self.buffer)
-        if validation == 1:
-            resf = self.Prediction_Valeur(valeur_mesuree, vitesse_vent, modele)
-            resf = self.b_pred_filt[0, :]
-        elif validation == 0:
-            resf = self.b_pred_filt[0, :]
-
-        # pas de restitution si historique insuffisant
-        if self.buffer[NON_FILTRE, T_BUFFER-4] == 0 and validation != -1:
-            resf = zeros((HORIZON))
-        return resf
 
     def Info_Date(self):
         """
@@ -374,6 +370,29 @@ class predicteur:
             tendance = -1.0
         return tendance
 
+    def Ecart_Tendance(self):
+        """
+        Fourniture de la moyenne des écarts des 3 dernières tendances :
+            ecart entre la tendance calculee sur les valeurs predites et
+            la tendance calculee sur les valeurs reelles.
+        Ecart fourni uniquement si l historique est de 4h
+        Entree :
+            aucune
+        Sortie :
+            ecart : moyenne des 3 ecarts de tendance (-1 si historique < 4h)
+        """
+        ecart = -1.0
+        if self.buffer[NON_FILTRE, T_BUFFER-3] > 0.1:
+            ecart = 0.0
+            for t in range(2, 5):
+                prevu = (self.b_pred_meil[t, 0] +
+                         self.b_pred_meil[t, 1]) / 2.0
+                reel = (self.buffer[NON_FILTRE, T_BUFFER-t+1] +
+                        self.buffer[NON_FILTRE, T_BUFFER-t+2]) / 2.0
+                ecart += abs(prevu - reel)
+            ecart /= 3.0
+        return ecart
+
     def Historique(self, traitement=NON_FILTRE):
         """
         Fourniture de l historique des mesures. La plus recente (T_BUFFER)
@@ -397,8 +416,8 @@ class predicteur:
         Entree :
             Histo : historique de calcul (T_BUFFER par défaut)
             Horizon : horizon de prediction choisi (1 par defaut)
-            traitement : donnee d'entree -> 0-valeur mesuree, 1-valeur filtree,
-            11-valeur ecretee(0 par defaut)
+            traitement : donnee d'entree -> 0-mesuree (defaut), 1-filtree,
+            11-ecretee
         Sortie : indic : array avec
                 [0] pour MAE(Mean Absolute Error): Erreur absolue moyenne
                 [1] pour PCC(Pearson Correlation Coefficient) : 1 OK, 0 KO
@@ -425,7 +444,7 @@ class predicteur:
                 indic[6] = indic[4] / self.buffer[traitement, T_BUFFER - i]
             else:
                 relatif_ko = True
-        print("a puis b", a, b)
+        # print("a puis b", a, b)
         indic[0] /= histo
         indic[2] /= histo
         indic[4] /= histo
@@ -435,34 +454,13 @@ class predicteur:
             indic[6] = -1.0
             indic[7] = -1.0
             indic[8] = -1.0
+            indic[1] = -1.0
         else:
             indic[6] /= (histo + 1)
             indic[7] /= (histo + 1)
             indic[8] = sqrt(indic[5])
-        (indic[1], c) = stats.pearsonr(a, b)
+            (indic[1], c) = stats.pearsonr(a, b)
         return indic
-
-    def Ecart_Tendance(self):
-        """
-        Fourniture de la moyenne des écarts des 3 dernières tendances :
-            ecart entre la tendance calculee sur les valeurs predites et
-            la tendance calculee sur les valeurs reelles.
-        Ecart fourni uniquement si l historique est de 24h
-        Entree :
-            aucune
-        Sortie :
-            ecart : moyenne des 3 ecarts
-        """
-        ecart = 0.0
-        if self.buffer[NON_FILTRE, 0] > 0.1:
-            for t in range(2, 5):
-                prevu = (self.b_pred_meil[t, 0] +
-                         self.b_pred_meil[t, 1]) / 2.0
-                reel = (self.buffer[NON_FILTRE, T_BUFFER-t+1] +
-                        self.buffer[NON_FILTRE, T_BUFFER-t+2]) / 2.0
-                ecart += abs(prevu - reel)
-            ecart /= 3.0
-        return ecart
 
     def Debug_Pred(self):
         """
@@ -474,7 +472,7 @@ class predicteur:
             fichier = FILE_DEBUG + str(k) + '.csv'
             if (k == 0) or (k == 1 and DEBUG_PREDICTION2) or \
                (k == 2 and DEBUG_PREDICTION3) or \
-               (k == 3 and DEBUG_PREDICTION4) or \
+                   (k == 3 and DEBUG_PREDICTION4) or \
                (k == 4 and DEBUG_PREDICTION5) or \
                (k == 5 and DEBUG_PREDICTION6):
 

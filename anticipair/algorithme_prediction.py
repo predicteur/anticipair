@@ -52,9 +52,10 @@ def Analyse(valeur, buffer):
     if res == 0:
         if date_buffer == date_valeur:
             res = 0
-        elif date_buffer == DATE_INIT or \
-                date_valeur - date_buffer == TIME_HEURE:
+        elif date_buffer == DATE_INIT:
             res = 1
+        elif date_valeur - date_buffer >= TIME_HEURE:
+            res = int((date_valeur - date_buffer) / TIME_HEURE)
         else:
             res = -1
 
